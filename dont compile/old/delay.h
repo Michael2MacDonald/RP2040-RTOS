@@ -15,7 +15,7 @@
  * System Tick Counter
  * Increments every systick interrupt
  */
-// extern volatile uint32_t TickCount;
+// extern volatile uint32_t Ticks;
 
 
 void delay(unsigned long msec);

@@ -129,16 +129,25 @@
 extern uint64_t F_CPU_CURRENT; // This is the clock frequency that the device is currently configured for. It must be set by the application code whenever the clock frequency changes.
 // #define F_CPU_ACTUAL  // Measure the actually clock frequency
 
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000UL )
-#define clockCyclesToMicroseconds(cycles) ( ((cycles) * 1000UL) / (F_CPU / 1000UL) )
-#define microsecondsToClockCycles(cycles) ( (cycles) * (F_CPU / 1000000UL) )
+// Clock cycles per unit time
+#define ClocksPerMillisecond ( F_CPU / 1000UL )
+#define ClocksPerMicrosecond ( F_CPU / 1000000UL )
+#define ClocksPerNanosecond  ( F_CPU / 1000000000UL )
+// Convert clock cycles to time
+#define ClocksToMillis(cycles) ( ((cycles) * 1000UL) / ClocksPerMillisecond )
+#define ClocksToMicros(cycles) ( ((cycles) * 1000UL) / ClocksPerMicrosecond )
+#define ClocksToNanos(cycles)  ( ((cycles) * 1000UL) / ClocksPerNanosecond )
+// Convert time to clock cycles
+#define MillisToClocks(ms) ( (ms) * ClocksPerMillisecond )
+#define MicrosToClocks(us) ( (us) * ClocksPerMicrosecond )
+#define NanosToClocks(ns)  ( (ns) * ClocksPerNanosecond )
 
 void delay(uint32_t msec);
 void delay_nop(uint32_t count);
 void sleep(uint32_t msec);
 
-inline uint32_t millis(); // Return the number of milliseconds since the program started. May be reset/changed with reset_millis().
-void reset_millis(uint32_t millis); // Set 'TickCount' to 'millis'
+uint32_t millis(); // Return the number of milliseconds since the program started. May be reset/changed with reset_millis().
+void reset_millis(uint32_t millis); // Set 'Ticks' to 'millis'
 
 
 /**===========================================================================

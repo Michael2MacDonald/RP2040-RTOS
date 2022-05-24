@@ -17,7 +17,7 @@
 // 	(uint32_t)(nullptr), // Start Scheduler
 // 	(uint32_t)(&purgeThreads),     // 'purgeThreads()' Remove expired threads
 // 	(uint32_t)(&updateThreads),    // 'updateThreads()' Update blocked threads if their condition/delay/wait is over
-// 	(uint32_t)(&selectNextThread), // 'selectNextThread()' Returns the highest priority thread that is not blocked
+// 	(uint32_t)(&setActiveThread), // 'setActiveThread()' Returns the highest priority thread that is not blocked
 // 	(uint32_t)(nullptr), // 'create()' Create a new thread
 // 	(uint32_t)(nullptr),
 // 	(uint32_t)(nullptr),
@@ -30,7 +30,7 @@
 // SVC_Handler_Table[0] = (uint32_t)(nullptr); // Start Scheduler
 // SVC_Handler_Table[1] = (uint32_t)(Kernel::Scheduler::purgeThreads);     // 'purgeThreads()' Remove expired threads
 // SVC_Handler_Table[2] = (uint32_t)(Kernel::Scheduler::updateThreads);    // 'updateThreads()' Update blocked threads if their condition/delay/wait is over
-// SVC_Handler_Table[3] = (uint32_t)(Kernel::Scheduler::selectNextThread); // 'selectNextThread()' Returns the highest priority thread that is not blocked
+// SVC_Handler_Table[3] = (uint32_t)(Kernel::Scheduler::setActiveThread); // 'setActiveThread()' Returns the highest priority thread that is not blocked
 
 
 
@@ -52,20 +52,20 @@ extern "C" {
 		struct Scheduler {
 			// const static void* purgeThreads;
 			// const static void* updateThreads;
-			// const static void* selectNextThread;
+			// const static void* setActiveThread;
 			const static func_void_t purgeThreads;
 			const static func_void_t updateThreads;
-			const static func_void_ptr_t selectNextThread;
+			const static func_void_ptr_t setActiveThread;
 
 			// static TCB* CurrentTCB;
 		} const Sched;
 
 		// const void* Scheduler_capi::purgeThreads = Kernel::Scheduler::purgeThreads;
 		// const void* Scheduler_capi::updateThreads = Kernel::Scheduler::updateThreads;
-		// const void* Scheduler_capi::selectNextThread = Kernel::Scheduler::selectNextThread;
+		// const void* Scheduler_capi::setActiveThread = Kernel::Scheduler::setActiveThread;
 		const func_void_t purgeThreads = Kernel::Scheduler::purgeThreads;
 		const func_void_t updateThreads = Kernel::Scheduler::updateThreads;
-		const func_void_ptr_t selectNextThread = (func_void_ptr_t)Kernel::Scheduler::selectNextThread;
+		const func_void_ptr_t setActiveThread = (func_void_ptr_t)Kernel::Scheduler::setActiveThread;
 		
 		// TCB* CurrentTCB = Kernel::Scheduler::CurrentTCB;
 

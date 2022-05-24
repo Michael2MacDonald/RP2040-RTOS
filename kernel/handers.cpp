@@ -36,8 +36,9 @@ void HardFault_Handler() {
 // }
 
 
-// extern "C" uint32_t TickCount;
-extern volatile uint32_t TickCount;
+// extern "C" uint32_t Ticks;
+extern volatile uint32_t Ticks, Uptime, Millis, Micros;
+
 extern "C" __attribute__((weak))
 void systick_hook() {
 	return;
@@ -46,10 +47,14 @@ void systick_hook() {
 extern "C" __attribute__((used))
 void SysTick_Handler() { // Runs every 1ms as defined in startup.c
 
-	TickCount++; // Increment TickCount for delays and other functions
+	Ticks++; // Increment Ticks for delays and other functions
+	/** TODO: Increment Millis and Micros based off of ticks and the Systick interval */
+	Uptime++; // Increment Uptime for delays and other functions
+	Millis++; // Increment Millis for delays and other functions
+	Micros++; // Increment Micros for delays and other functions
 
-	// if (Kernel::Sched->enabled == true && ((SCB->ICSR & SCB_ICSR_PENDSVSET_Msk) >> SCB_ICSR_PENDSVSET_Pos) != 1) { // only run if scheduler is enabled and no PendSV interrupt is pending
-	if (Kernel::Sched->enabled == true) { // only run if scheduler is enabled and no PendSV interrupt is pending
+	if (Kernel::Sched->enabled == true && ((SCB->ICSR & SCB_ICSR_PENDSVSET_Msk) >> SCB_ICSR_PENDSVSET_Pos) != 1) { // only run if scheduler is enabled and no PendSV interrupt is pending
+	// if (Kernel::Sched->enabled == true) { // only run if scheduler is enabled and no PendSV interrupt is pending
 		// Check for the highest priority thread and switch context
 		PendSV_Trigger(); // Call PendSV to switch context
 	}

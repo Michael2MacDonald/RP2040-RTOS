@@ -45,13 +45,13 @@ PendSV_Handler:
 
 	// Save Context (Save r4-r7 to thread stack)
 	mrs r2, psp             // Move the Program Stack Pointer (PSP) to r2
-	subs r2, #4         // Subtract 4 from the PSP
+	subs r2, #4             // Subtract 4 from the PSP
 	str r4, [r2]            // Store r4 to the stack
-	subs r2, #4         // Subtract 4 from the PSP
+	subs r2, #4             // Subtract 4 from the PSP
 	str r5, [r2]            // Store r5 to the stack
-	subs r2, #4         // Subtract 4 from the PSP
+	subs r2, #4             // Subtract 4 from the PSP
 	str r6, [r2]            // Store r6 to the stack
-	subs r2, #4         // Subtract 4 from the PSP
+	subs r2, #4             // Subtract 4 from the PSP
 	str r7, [r2]            // Store r7 to the stack
 	@ stmdb r2!, {r4-r7}      // Store registers r4-r7 on the thread stack (Decrement address Before each store and store the final address back into R0)
 	
@@ -68,15 +68,14 @@ PendSV_Handler:
 	ldr r1, [r0]            // Load the address of the current TCB into register r1
 	ldr r2, [r1]            // Load the value of the first member of the current TCB (the thread stack pointer) into register r2
 	
-	adds r2, #4         // Add 4 to the PSP
-	str r4, [r2]            // Store r4 to the stack
-	adds r2, #4         // Add 4 to the PSP
-	ldr r5, [r2]            // Store r5 to the stack
-	adds r2, #4         // Add 4 to the PSP
-	ldr r6, [r2]            // Store r6 to the stack
-	adds r2, #4         // Add 4 to the PSP
-	ldr r7, [r2]            // Store r7 to the stack
-	
+	ldr r7, [r2]            // Load r7 from the stack
+	adds r2, #4             // Add 4 to the PSP
+	ldr r6, [r2]            // Load r6 from the stack
+	adds r2, #4             // Add 4 to the PSP
+	ldr r5, [r2]            // Load r5 from the stack
+	adds r2, #4             // Add 4 to the PSP
+	ldr r4, [r2]            // Load r4 from the stack
+	adds r2, #4             // Add 4 to the PSP
 	
 	@ ldmia r2!, {r4-r7}      // Load registers r4-r7 from the thread stack (Increment address After each transfer and store final address in r2)
 	msr psp, r2             // Set the Program Stack Pointer (PSP) to the thread stack pointer

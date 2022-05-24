@@ -38,7 +38,8 @@
 
 extern void PendSV_Trigger();
 
-extern volatile uint32_t TickCount; // Tick counter
+extern volatile uint32_t Ticks; // Tick counter
+extern volatile uint32_t Millis;
 
 
 class Scheduler;
@@ -60,8 +61,8 @@ typedef enum ThreadPriority { // Priority levels for tasks
 typedef enum ThreadState {
 	// States that can be run
 	active,   // Thread is currently running (Rename to Running?)
-	paused,   // Rename Stopped???
-	queued,   // Has not started yet (rename to ready?)
+	paused,   // Rename Preempted, Stopped???
+	queued,   // Has not started yet (rename to ready, available???)
 	// States prevent the thread from running (Blocked)
 	waiting,  // Blocked on a resource (Mutex, Semaphore, etc) and will unblock when the resource is available
 	sleeping, // Blocked for a specific period of time and will unblock when the timer expires.
@@ -71,23 +72,24 @@ typedef enum ThreadState {
 // typedef bool (*Condition_t)(void);
 // typedef std::function<bool(void)> Condition_t; // Rename Condition_t to Cond_t????
 
-struct sleep_t { /** TODO: Rename */
-	volatile uint32_t start; // Start time
-	volatile uint32_t delay; // Delay
-	sleep_t() {}
-	sleep_t(uint32_t _delay) {
-		delay = _delay;
-		start = TickCount;
-	}
-	// __attribute__((noinline, optimize("Og")))
-	__attribute__((optimize("Og")))
-	bool check() { // Check if the delay is over
-		if ((TickCount - start) >= delay)
-			return true;
-		else
-			return false;
-	}
-};
+union StateMgr {
+	struct {
+		uint32_t start; // Start time
+		uint32_t delay; // Delay in milliseconds
+		bool operator==(bool) { return (millis() - start) >= delay; }
+		operator bool() { return (millis() - start) >= delay; }
+	} sleep;
+	struct {
+		void* event;
+		bool operator==(bool) { return true; }
+		operator bool() { return true; }
+	} event;
+	struct {
+		void* resource;
+		bool operator==(bool) { return true; }
+		operator bool() { return true; }
+	} resource;
+}; /** END: union StateMgr */
 
 
 /** STACK: Task Initialization
@@ -113,6 +115,9 @@ struct sleep_t { /** TODO: Rename */
  * +------+
  */
 struct TCB_Stack { // Rename????
+	// const uint32_t size; // Size of stack in bytes
+	uint8_t dummy[256 - 48]; // Dummy space for stack; hard set 256 bytes for now
+
 	// Initial stack contents
 	uint32_t r7, r6, r5, r4; // Pushed and popped by PendSV_Handler() to save and restore context
 	uint32_t r0, r1, r2, r3; // Return value register, scratch register, or argument register
@@ -120,9 +125,6 @@ struct TCB_Stack { // Rename????
 	uint32_t lr;   // Link register
 	uint32_t pc;   // Program counter
 	uint32_t xPSR; // Program status register
-
-	// const uint32_t size; // Size of stack in bytes
-	uint8_t dummy[256 - 32]; // Dummy space for stack; hard set 256 bytes for now
 
 	// TCB_Stack(uint32_t funcAddr) {
 	TCB_Stack() {
@@ -147,9 +149,8 @@ typedef struct TCB { // Thread control block
 
 	ThreadState state; // active, paused, blocked, queued
 
-	/** TODO: Rename updateState (stateUtil, state_util, ???) */
-	volatile void* updateState = nullptr; // Pointer to object used by blocked states to check if the state should be unblocked
-	struct sleep_t _sleep; // Sleep object used by sleeping state to check if the state should be unblocked
+	/** TODO: replace?? improve?? */
+	StateMgr stateMgr; // Pointer to object used by blocked states to check if the state should be unblocked
 
 	std::string name; // User defined name for the thread. Used to get a handle to the thread.
 	// char name[MAX_THREAD_NAME_LEN]; // User defined name for the thread. Used to get a handle to the thread.
@@ -160,9 +161,8 @@ typedef struct TCB { // Thread control block
 		name = _name; // Set name
 		func = _func; // Set func
 		priority = _priority; // Set priority
-		state = _state; // Set state
+		state = _state; // Set state manager
 
-		// sp = (uint32_t)(&(stack.r0));
 		sp = (uint32_t)(&(stack.r7));
 		stack.pc = (uint32_t)func;
 	}
@@ -212,7 +212,7 @@ public:
 
 	// void purgeThreads(); // Remove expired threads
 	void updateThreads(); /** TODO: Remove?? Replace?? */ // Updates blocked threads if there condition/delay/wait is over
-	TCB* selectNextThread(); // Returns the highest priority thread that is not blocked
+	TCB* setActiveThread(); // Returns the highest priority thread that is not blocked
 	
 	/** TODO: Remove?? Replace?? */
 	void onReturn() { // Called when active thread returns

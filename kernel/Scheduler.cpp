@@ -21,10 +21,6 @@ extern "C" Kernel::TCB_t* _FAST;
 extern "C" Kernel::TCB_t* _MAIN;
 extern void PendSV_Trigger();
 
-// extern inline uint32_t millis();
-
-extern volatile bool switch_signal;
-
 namespace Kernel {
 
 // Core_t Core; // Create Core object
@@ -63,7 +59,7 @@ void Scheduler::block() { // Block the current thread
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
 	CurrentTCB->state = blocked; // Set the current thread's state to blocked
-	CurrentTCB->updateState = nullptr;
+	// CurrentTCB->stateMgr = nullptr;
 	PendSV_Trigger(); // Trigger PendSV to switch to another thread
 
 	asm volatile("dsb"); // Data Synchronization Barrier
@@ -77,7 +73,7 @@ void Scheduler::block(TCB* thread) { // Block the current thread
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
 	thread->state = blocked; // Set the current thread's state to blocked
-	thread->updateState = nullptr; // Set the current thread's updateState to nullptr
+	// thread->stateMgr = nullptr; // Set the current thread's stateMgr to nullptr
 
 	asm volatile("dsb"); // Data Synchronization Barrier
 	asm volatile("isb"); // Instruction Synchronization Barrier
@@ -89,23 +85,21 @@ void Scheduler::unblock(TCB* thread) { // Unblock a thread
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
 	thread->state = paused; // Set the thread's state to paused
-	thread->updateState = nullptr; // Set the thread's updateState to nullptr
+	// thread->stateMgr = nullptr; // Set the thread's stateMgr to nullptr
 	PendSV_Trigger(); // Trigger PendSV to switch to make sure the unblocked thread preempts the current thread if it has a higher priority
 
 	asm volatile("dsb"); // Data Synchronization Barrier
 	asm volatile("isb"); // Instruction Synchronization Barrier
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
-__attribute__((optimize("Og")))
-void Scheduler::sleep(uint32_t millis) { // Unblock a thread
+void Scheduler::sleep(uint32_t msec) { // Unblock a thread
 	// Disable interrupts to prevent systick from triggering PendSV
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
-	// sleepQueue.push_back(new sleep_t(millis, CurrentTCB));
-	// CurrentTCB->updateState = new sleep_t(millis);
 	CurrentTCB->state = sleeping;
-	CurrentTCB->_sleep.delay = millis;
-	CurrentTCB->_sleep.start = TickCount;
+	CurrentTCB->stateMgr.sleep.delay = msec;
+	CurrentTCB->stateMgr.sleep.start = millis();
+	PendSV_Trigger(); // Trigger PendSV to switch to make sure the unblocked thread preempts the current thread if it has a higher priority
 
 	asm volatile("dsb"); // Data Synchronization Barrier
 	asm volatile("isb"); // Instruction Synchronization Barrier
@@ -117,13 +111,10 @@ void Sched_onReturn() {
 }
 
 // Returns the highest priority thread that is not blocked
-TCB* Scheduler::selectNextThread() { // No threads can be active when this is called!
+TCB* Scheduler::setActiveThread() { // No threads can be active when this is called!
 
-	asm volatile("dsb":::"memory"); // Data Synchronization Barrier
-	asm volatile("isb":::"memory"); // Instruction Synchronization Barrier
-
-	// If this context switch was not because the current thread just entered a blocked state
-	if (CurrentTCB->state == active) CurrentTCB->state = paused; // Set the current thread's state to paused
+	// Set the current thread's state to paused if it did not just entered a blocked state
+	if (CurrentTCB->state == active) CurrentTCB->state = paused;
 
 	// Set the first thread ("_MAIN") as the currently selected thread
 	TCB* selected = threads[0];
@@ -140,92 +131,51 @@ TCB* Scheduler::selectNextThread() { // No threads can be active when this is ca
 		}
 	}
 
-	// Return the selected thread with the highest priority of all threads
-	CurrentTCB = selected;
-	// CurrentTCB = threads[1];
-
-	CurrentTCB->state = active; // make the new current thread active
-
-	return (TCB*)CurrentTCB;
+	// Return the highest priority thread that is not blocked
+	CurrentTCB = selected; // Set the current thread to the thread selected by the code above
+	CurrentTCB->state = active; // Make the new current thread active
+	return (TCB*)CurrentTCB; // Return the new current thread in case it is needed
 }
 
 void Scheduler::updateThreads() {
 	for (unsigned int i = 0; i < Sched->threads.size(); i++) { // For each thread
-
 		// Check if the thread is in a blocked state that should be updated (waiting, sleeping, etc)
-		// if (threads[i]->state >= waiting && threads[i]->state != blocked) {
-			// if (threads[i]->updateState != nullptr) { // if the pointer is not null
-
-				if (this->threads[i]->state == sleeping) {
-					// sleep_t *sleep = (sleep_t*)threads[i]->updateState; // Cast the pointer to a sleep_t pointer
-					// int start = sleep->start;
-					// int now = TickCount;
-					// int delay = sleep->delay;
-					// if (now - start >= delay) {
-					// 	threads[2]->state = paused;
-					// }
-					// if (TickCount - sleep->start >= sleep->delay) {
-					// if (TickCount - sleep->start >= 3000) {
-					// if (sleep->check() == true) {
-					// 	// threads[2]->state = paused;
-					// 	threads[i]->state = paused; // Set the current thread's state to paused
-					// 	threads[i]->updateState = nullptr;
-					// 	delete sleep; // Delete the sleep object
-					// }
-					if (threads[i]->_sleep.check() == true) {
-						threads[i]->state = paused; // Set the current thread's state to paused
-						threads[i]->_sleep.delay = 0;
-						threads[i]->_sleep.start = 0;
-					}
-					// threads[2]->state = paused;
-				} else if (threads[i]->state == waiting) {
-					/** TODO: Code */
-				} else { /** TODO: Throw an error (waiting or sleeping thread has null updateState pointer) */ }
-
-			// } else { /** TODO: Throw an error (waiting or sleeping thread has null updateState pointer) */ }
-		// }
+		if (threads[i]->state == sleeping) {
+			if (threads[i]->stateMgr.sleep) { // If the thread has finished sleeping
+				threads[i]->state = paused; // Set the current thread's state to paused
+			}
+		} else if (threads[i]->state == waiting) {
+			/** TODO: Code */
+		} else { /** TODO: Throw an error (waiting or sleeping thread has null stateMgr pointer) */ }
 
 	} /** END: for each thread in threads */
 }
 
+/** TODO:
+ * - Check for stack overflow
+ * - Check for suspended threads
+ * 	- vDelays
+ * 	- waiting for resources
+ * 	- etc
+ * - Check tasks that are waiting
+ * 	- delay
+ * 	- interupt
+ * 	- event
+ * - check events???
+ * - Find the highest priority thread and set CurrentTCB to that thread
+ * 
+ */
 extern "C" uint32_t SwitchContext() { // Rename??
-	/** TODO:
-	 * - Check for stack overflow
-	 * - Check for suspended threads
-	 * 	- vDelays
-	 * 	- waiting for resources
-	 * 	- etc
-	 * - Check tasks that are waiting
-	 * 	- delay
-	 * 	- interupt
-	 * 	- event
-	 * - check events???
-	 * - Find the highest priority thread and set CurrentTCB to that thread
-	 * 
-	 */
 
-	// asm volatile("dsb":::"memory"); // Data Synchronization Barrier
-	// asm volatile("isb":::"memory"); // Instruction Synchronization Barrier
-
-	// Check if any threads need to exit from sleep or waiting
+	// Check if any threads need to exit from sleeping or waiting
 	Sched->updateThreads();
+	// Set the currently selected thread to the highest priority thread that is not blocked
+	uint32_t result = (uint32_t)Sched->setActiveThread(); // Select the next thread to run
 
-	// if (Sched->threads[2]->state == blocked) {
-	// 	static int start = 0;
-	// 	if (start == 0) {
-	// 		start = TickCount;
-	// 	} else if (TickCount - start >= 3000) {
-	// 		Sched->threads[2]->state = paused; // Set the current thread's state to paused
-	// 		delete Sched->threads[2]->sleep; // Delete the sleep queue entry
-	// 		Sched->threads[2]->sleep = nullptr;
-	// 		start = 0; // Set to zero so that the next time the thread is blocked it will set the start value to the current tick count
-	// 	}
-	// }
-
+	/** TODO: Needed?? */
 	asm volatile("dsb":::"memory"); // Data Synchronization Barrier
 	asm volatile("isb":::"memory"); // Instruction Synchronization Barrier
 	
-	uint32_t result = (uint32_t)Sched->selectNextThread(); // Select the next thread to run
 	return result;
 }
 

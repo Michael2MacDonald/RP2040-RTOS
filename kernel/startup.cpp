@@ -6,7 +6,6 @@
 #include "Scheduler.h"
 
 #include <vector>
-// #include <string>
 #include <cstring>
 
 #include <resets.h>
@@ -22,8 +21,8 @@ extern "C" void blink_led();
 extern "C" int blink_led_fast();
 extern "C" int blink_led_fast_loop();
 
-extern "C" int blink_led_fast_loop_switch();
-extern "C" int blink_led_slow_loop_switch();
+extern "C" int blink_fast_thread();
+extern "C" int blink_slow_thread();
 
 extern "C" void SVC();
 extern "C" void Sched_init();
@@ -38,28 +37,23 @@ extern Kernel::Scheduler* Sched;
 
 extern "C" {
 	bool* enabled;
-
-	Kernel::TCB* _MAIN;
-	// Kernel::TCB* _FAST;
-
-	// Kernel::TCB _MAIN_(0, "_MAIN", Kernel::none, Kernel::nonurgent, Kernel::queued, &main, 0);
-	// Kernel::TCB _FAST_(1, "_FAST", Kernel::high, Kernel::urgent, Kernel::queued, &blink_led_fast_loop, 0);
 }
 
 
-extern "C" __attribute__((noreturn, section(".startup"), optimize("no-tree-loop-distribute-patterns")))
+// extern "C" __attribute__((noreturn, section(".startup"), optimize("no-tree-loop-distribute-patterns")))
+extern "C" __attribute__((noreturn, section(".startup")))
 void _startup(void) {
 
-	asm volatile("CPSID i":::"memory"); // Disable interrupts
+	// asm volatile("CPSID i":::"memory"); // Disable interrupts
 
 	nvic_setpriority(PendSV_IRQn, 3);  // Set PendSV interrupt to the lowest priority
 	nvic_setpriority(SVCall_IRQn, 1);  // Set SVCall interrupt to the second highest priority
-	nvic_setpriority(SysTick_IRQn, 1); // Set Systick interrupt to the highest priority
+	nvic_setpriority(SysTick_IRQn, 0); // Set Systick interrupt to the highest priority
 
 	/** TODO: Remove F_CPU_CURRENT entirely??? */
 	F_CPU_CURRENT = (6*1000000); // Startup at 6 MHz
 
-	/** TODO: Move to system_init() or core_init() */
+	/** TODO: Move to system_init() or core_init()??? */
 	clock_setup();   // Setup clock, PLL, etc.
 	gpio_setup();    // Setup GPIOs
 	uart_setup();    // Setup UART
@@ -77,38 +71,16 @@ void _startup(void) {
 	asm("dsb"); // Data synchronization barrier
 	asm("isb"); // Instruction synchronization barrier
 
-	// _MAIN = nullptr;
-	// _FAST = nullptr;
-
-	// _MAIN = new Kernel::TCB(0, "_MAIN", Kernel::none, Kernel::nonurgent, Kernel::queued, &main, 0);
-	// _FAST = new Kernel::TCB(1, "_FAST", Kernel::high, Kernel::urgent, Kernel::queued, &blink_led_fast_loop, 0);
-
-	// Kernel::TCB _MAIN_(0, "_MAIN", Kernel::none, Kernel::nonurgent, Kernel::queued, &main, 0);
-	// Kernel::TCB _FAST_(1, "_FAST", Kernel::high, Kernel::urgent, Kernel::queued, &blink_led_fast_loop, 0);
-
-	// _MAIN = &_MAIN_;
-	// _FAST = &_FAST_;
-	// _FAST->func = &blink_led_fast_loop;
-
+	
 	Kernel::Sched = new Kernel::Scheduler();
 	enabled = &(Kernel::Sched->enabled);
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
-	// Kernel::Sched->threads.push_back(_MAIN);
-	// Kernel::Sched->threads.push_back(_FAST);
 	Kernel::Sched->create("_MAIN",256, &main, Kernel::none);
-	Kernel::Sched->create("_FAST",256, &blink_led_fast_loop_switch, Kernel::moderate);
-	Kernel::Sched->create("_SLOW",256, &blink_led_slow_loop_switch, Kernel::high);
-	// Kernel::Scheduler::getInstance()->start(); // Start the scheduler
-
+	Kernel::Sched->create("_FAST",256, &blink_fast_thread, Kernel::moderate);
+	Kernel::Sched->create("_SLOW",256, &blink_slow_thread, Kernel::high);
 	
-	// CurrentTCB = _MAIN;
-	// CurrentTCB = _FAST;
 	CurrentTCB = Kernel::Sched->thread("_MAIN");
-	// _FAST = Kernel::Sched->thread("_FAST");
-	// volatile register Kernel::TCB* CurrentTCB_r asm("r9");
-	// CurrentTCB_r = _MAIN;
-
 
 	// asm volatile("CPSIE i":::"memory"); // Enable interrupts
 
@@ -121,58 +93,7 @@ void _startup(void) {
 	asm volatile("CPSIE i":::"memory"); // Enable interrupts
 
 
-	// std::vector<int> test;
-	// if(Kernel::Sched->thread("_FAST") != nullptr) {
-	// 	blink_led();
-	// }
-	// if(Kernel::Sched->thread(0) != nullptr) {
-	// 	blink_led();
-	// }
-	// if(_FAST != nullptr) {
-	// 	blink_led();
-	// }
-	// if(_FAST == &_FAST_) {
-	// 	blink_led();
-	// }
-	// if(Kernel::Sched->threads[1] == &_FAST_) {
-	// 	blink_led();
-	// }
-	// if(Kernel::Sched->threads[1]->func == &blink_led_fast_loop) {
-	// // if(Kernel::Sched->threads[1]->func == nullptr) {
-	// 	blink_led();
-	// }
-	// if(Kernel::Sched->threads[1]->stack.pc == (uint32_t)&blink_led_fast_loop) {
-	// 	blink_led();
-	// }
-	// for (int i = 0; i < Kernel::Sched->threads.size(); i++) {
-	// 	// if(Kernel::Sched->threads[i]->func == &main) {
-	// 	// 	blink_led();
-	// 	// }
-	// 	if(Kernel::Sched->threads[i]->name == "_MAIN") {
-	// 		blink_led();
-	// 	}
-	// }
-	// if (Kernel::Sched->thread("_MAIN") != nullptr) {
-	// 	blink_led();
-	// 	if (Kernel::Sched->thread("_MAIN")->name == "_MAIN") {
-	// 		blink_led();
-	// 	}
-	// }
-	// while (1) asm volatile("wfe");
-
-
-	// blink_led();
-	// Sched->init();
-	// blink_led();
-	// while (1) asm volatile("WFI"); // DON'T RETURN!!!!
-
-
 	blink_led();
-	// asm volatile(
-	// 	".extern Sched_init \n"
-	// 	"bl Sched_init \n"
-	// 	::: "memory"
-	// ); // set CONTROL.SPSEL to 1 (psp)
 	Sched_init();
 	// Kernel::Sched->enabled = true; // Start the scheduler
 	// *enabled = true; // Start the scheduler

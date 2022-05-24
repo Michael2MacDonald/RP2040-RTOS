@@ -22,10 +22,10 @@ MKUF2  := mkuf2
 # Small Code:    s (Enables all -O2 optimizations except those that often increase code size)
 # Smallest Code: z (Optimize aggressively for size rather than speed. Similar to -Os)
 # OPT := 3
-# OPT := 2
+OPT := 2
 # OPT := 1
 # OPT := 0
-OPT := g
+# OPT := g
 # OPT := s
 
 # -Og 12856 1296
@@ -62,7 +62,7 @@ OBJDUMP_FLAGS    := -d -C #-S -r
 # Flags and Defines
 #******************************************************************************
 FLAGS_CPU := -mthumb -mcpu=cortex-m0plus -mabi=aapcs #-mfloat-abi=hard -mfpu=fpv5-d16
-FLAGS_OPT := -O$(OPT) -fno-inline #-fno-gcse #-fno-move-loop-invariants
+FLAGS_OPT := -O$(OPT) #-fno-inline #-fno-gcse #-fno-move-loop-invariants
 FLAGS_COM := -g -Wall -Wextra -Wno-unused-parameter -Wunsafe-loop-optimizations -Wstack-usage=256 -ffunction-sections -fdata-sections -MMD -ffixed-r9 -nostdlib #--verbose
 FLAGS_LSP := 
 

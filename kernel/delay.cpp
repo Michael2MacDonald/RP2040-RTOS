@@ -1,24 +1,44 @@
 #include "kernel.h"
+#include <rp2040.h>
 
 /** TODO: Move from C++ to C */
 
 
 // System Tick Counter: Increments every systick interrupt (1ms). Used by timing functions like delay().
-volatile uint32_t TickCount = 0; /** TODO: Rename */
+volatile uint32_t Ticks = 0; /** TODO: Rename */  // Ticks is incremented every systick interrupt (Can be reset)
+volatile uint32_t Uptime = 0; /** TODO: Rename */ // Milliseconds since the system was started (Never reset except on system reset)
+volatile uint32_t Millis = 0; // Counts up in milliseconds (May be reset)
+volatile uint32_t Micros = 0; // Counts up in microseconds (May be reset)
+
 
 void delay(uint32_t msec) {
 	if (msec == 0) return;
 	uint32_t start = millis();
-	// uint32_t start = TickCount;
+	// uint32_t start = Ticks;
 	do {
 		// yield(); // Not yet implemented
 		asm volatile ("nop");
-	// } while (TickCount-start < msec);
+	// } while (Ticks-start < msec);
 	} while (millis()-start < msec);
 }
 
 void delay_nop(uint32_t count) {
 	while (count--) asm volatile ("nop");
+}
+
+void delay_notick(uint32_t msec) { // Delay millis without needing systick interrupt
+	// Calculate the number of cycles needed to delay the specified number of milliseconds
+	// One cycle is one loop of the while loop below
+
+	// 'nop' is two clock cycles and a for loop takes about 24 cycles (I think)
+	const uint32_t cycleLength = (24+2); // 24 instruction cycles
+
+	// (cycles * cycleLength)/F_CPU = seconds
+	// (seconds * F_CPU) / cycleLength = cycles
+	// So ((millis/1000) * F_CPU) / cycleLength = cycles
+	uint32_t cycles = ( (msec/1000) * F_CPU ) / cycleLength;
+
+	for (unsigned int i = 0; i<cycles; i++) asm volatile ("nop");
 }
 
 // __attribute__((weak)) // Allows the user to override the default implementation
@@ -29,15 +49,36 @@ void delay_nop(uint32_t count) {
 // 	} while(millis()-start > msec) ;
 // }
 
-__attribute__((always_inline))
-inline uint32_t millis() {
+// __attribute__((always_inline))
+uint32_t ticks() {
 	// asm volatile("cpsid i");
-	return TickCount;
+	return Ticks;
+	// asm volatile("cpsie i");
+}
+// __attribute__((always_inline))
+uint32_t millis() {
+	// asm volatile("cpsid i");
+	return Millis;
+	// asm volatile("cpsie i");
+}
+// __attribute__((always_inline))
+uint32_t micros() {
+	// asm volatile("cpsid i");
+	return Micros;
 	// asm volatile("cpsie i");
 }
 
+void reset_ticks(uint32_t ticks) {
+	/** TODO: Ensure that reseting Ticks does not effect Uptime, Millis, or Micros */
+	Ticks = ticks;
+}
 void reset_millis(uint32_t millis) {
-	TickCount = millis;
+	/** TODO: Ensure that reseting millis does not effect any timing code */
+	Millis = millis;
+}
+void reset_micros(uint32_t micros) {
+	/** TODO: Ensure that reseting micros does not effect any timing code */
+	Micros = micros;
 }
 
 // volatile uint32_t systick_millis_count = 0;
@@ -103,7 +144,7 @@ void reset_millis(uint32_t millis) {
  *  \param dwNew_MCK  Current master clock.
  */
 // extern uint32_t TimeTick_Configure( uint32_t dwNew_MCK ) {
-// 	TickCount = 0 ;
+// 	Ticks = 0 ;
 // 	return SysTick_Config( dwNew_MCK/1000 ) ;
 // }
 
