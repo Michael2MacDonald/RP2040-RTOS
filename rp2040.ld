@@ -1,32 +1,52 @@
+MAX_HEAP_SIZE = DEFINED(MAX_HEAP_SIZE) ? MAX_HEAP_SIZE : 0x10000; /* 64K */
+
 MEMORY {
-	FLASH (rx) : ORIGIN = 0x10000000, LENGTH = 2048k
-	RAM (rwx) : ORIGIN = 0x20000000, LENGTH = 264k
+	FLASH (rwx)  : ORIGIN = 0x10000000, LENGTH = 2048k
+	RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 264k
 }
 
-ENTRY(_reset)
+ENTRY(Reset_Handler)
 
 SECTIONS {
 	. = ORIGIN(FLASH);
 
-	.boot2 : {
-		KEEP (*(.boot2)) /* Second boot stage. Required by rp2040 to configure flash and ensure a bootable image using crc */
+	.text.headers : {
+		_sboot2 = .;
+		KEEP(*(.boot2))    /* Second boot stage. Required by rp2040 to configure flash and ensure a bootable image using crc */
+		_eboot2 = .;
+		_svectors = .;
+		KEEP(*(.vectors))  /* Reset vector table for arm exceptions and interupts */
+		_sservices = .;
+		KEEP(*(.services)) /* Service table for SVCall and PendSV service pointers */
+		. = ALIGN(1024);
 	} > FLASH
 
-	.text : {
-		KEEP (*(.vectors))
-		. = ALIGN(4);
-		KEEP (*(.reset)) /* Initialises data and ensures the cores are in a predictable state */
-		KEEP (*(.startup)) /* Initializes peripherals, starts RTOS, and runs application */
-		. = ALIGN(4);
+	_stext = .;
 
-		/* *(.init) */
-
+	.text.fastcode : {
 		. = ALIGN(4);
-		*(.text*);
+		*(.text.fastcode*); /* FASTRUN code is copied to ram (Look into gcc compiler option "hot") */
 		. = ALIGN(4);
+	} > RAM AT> FLASH
 
-		/* *(.fini) */
+	.text.code : {
+		. = ALIGN(4);
+		KEEP(*(.reset))   /* Initialises data and ensures the cores are in a predictable state */
+		KEEP(*(.startup)) /* Initializes peripherals, starts RTOS, and runs application */
 
+		*(.text.cold*) /* Code that is not often run. Seperate this code so that other code can be closer together and sometimes faster (Look into gcc compiler option "cold") */
+
+		/* *(.flashmem*) */     /* Code that should not be copied to ram */
+		*(.text*)
+		. = ALIGN(4);
+	} > FLASH
+
+
+
+	.text.progmem : { /* Program memory */
+		. = ALIGN(4);
+		*(.progmem*) /* Read-only data that should not be copied to ram */
+		. = ALIGN(4);
 	} > FLASH
 
 	/* Used for stack unwinding and tracing?? Debugging?? */
@@ -42,6 +62,7 @@ SECTIONS {
 	_etext = .;
 
 	.data : {
+		. = ALIGN(4);
 		*(.rodata);
 		*(.data);
 		. = ALIGN(4);
@@ -56,23 +77,36 @@ SECTIONS {
 	} > RAM
 
 	_end = .;
+	end = _end;
 
-	.heap (COPY): {
+	.heap (NOLOAD): {
+		_heap_start = .;
 		*(.heap*)
-		__HeapLimit = .;
+		. = . + MAX_HEAP_SIZE;
+		_heap_end = .;
+	} > RAM
+
+	.trap (NOLOAD): { /* Trap heap and stack overflows */
+		. = ALIGN(4);
+		/* Trap size: 64 bytes (May need to be increased) */
+		. = . + 64;
+		/* Trap size: 4 bytes (Use this if trap uses MPU instead of periodic checking) */
+		/*. = . + 4;*/
+		. = ALIGN(4);
 	} > RAM
 
 }
 
-
-
-_sboot2 = ADDR(.boot2);
-_eboot2 = ADDR(.boot2) + SIZEOF(.boot2);
-
+/* _sboot2 = ADDR(.boot2);
+_eboot2 = ADDR(.boot2) + SIZEOF(.boot2); */
 ASSERT(_eboot2 - _sboot2 == 256, "ERROR: rp2040 second stage bootloader must be 256 bytes in size");
 
-_stext = ADDR(.text);
-/* _start_func = ADDR(.start); */
+_sfastcode = ADDR(.text.fastcode);
+_efastcode = ADDR(.text.fastcode) + SIZEOF(.text.fastcode);
+_sfastcodeload = LOADADDR(.text.fastcode);
+
+/* _stext = ADDR(.text); */
+/* _etext = ADDR(.text) + SIZEOF(.text); */
 
 _sdata = ADDR(.data);
 _edata = ADDR(.data) + SIZEOF(.data);
@@ -81,4 +115,11 @@ _sdataload = LOADADDR(.data);
 _sbss = ADDR(.bss);
 _ebss = ADDR(.bss) + SIZEOF(.bss);
 
+_sheap = ADDR(.heap);
+_eheap = ADDR(.heap) + SIZEOF(.heap);
+
+_strap = ADDR(.trap);
+_etrap = ADDR(.trap) + SIZEOF(.trap);
+
+_estack = _etrap;
 _stack = ORIGIN(RAM) + LENGTH(RAM);

@@ -1,18 +1,22 @@
 {
-    "configurations": [
-        {
-            "name": "RP2040-Blink-UART",
-            "includePath": [
-                "src"
-            ],
-            "defines": [
-
-            ],
-            "compilerPath": "${workspaceFolder}/tools/arm/bin/arm-none-eabi-gcc.exe",
-            "intelliSenseMode": "gcc-arm",
-            "cppStandard": "gnu++14",
-            "cStandard": "gnu11"
-        }
-    ],
-    "version": 4
+	"configurations": [
+		{
+			"name": "RP2040-Blink-UART",
+			"includePath": [
+				"src",
+				"libs",
+				"kernel",
+				"core",
+				"tools/arm/lib/**"
+			],
+			"defines": [
+				"F_XOSC = (12*1000000)"
+			],
+			"compilerPath": "${workspaceFolder}/tools/arm/bin/arm-none-eabi-gcc.exe",
+			"intelliSenseMode": "gcc-arm",
+			"cppStandard": "gnu++14",
+			"cStandard": "gnu11"
+		}
+	],
+	"version": 4
 }

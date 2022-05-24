@@ -94,6 +94,19 @@
 		"valarray": "c",
 		"variant": "c",
 		"system_rp2040.h": "c",
-		"delay.h": "c"
+		"delay.h": "c",
+		"clock.h": "c",
+		"math.h": "c",
+		"rp2040.h": "c",
+		"cm0plus.h": "c",
+		"gpio.h": "c",
+		"uart.h": "c",
+		"kernel.h": "c",
+		"stdint.h": "c"
 	},
+	"cSpell.enableFiletypes": [
+		"json"
+	],
+	// "cortex-debug.openocdPath": "C:/Users/Michael/Documents/Personal/Programing/Embedded Development/tools/openocd/bin/openocd.exe",
+	// "cortex-debug.showRTOS": false
 }

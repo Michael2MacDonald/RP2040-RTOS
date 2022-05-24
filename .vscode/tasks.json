@@ -21,8 +21,18 @@
       },
       "command": "${workspaceFolder}/tools/make.exe",
       "args": [
-        "clean"
+        "clean",
+        // "-d"
       ]
+    },
+    {
+      "label": "Rebuild",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOrder": "sequence",
+      "dependsOn": ["Clean", "Build"]
     }
   ],
   
