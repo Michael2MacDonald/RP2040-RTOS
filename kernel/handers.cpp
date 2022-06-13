@@ -18,6 +18,9 @@ void NMI_Handler();
 // __attribute__((used, weak, alias("Default_Handler")))
 extern "C" __attribute__((used, weak))
 void HardFault_Handler() {
+	// Setup LED GPIO pins
+	gpio_init(13, GPIO_FUNC_SIO); // Set pin function to SIO
+	gpio_dir(13, GPIO_OUT); // Set pin as output
 	while(1){
 		gpio_set(13, HIGH);
 		delay_nop(2000000);

@@ -106,7 +106,7 @@ void Scheduler::sleep(uint32_t msec) { // Unblock a thread
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
 
-void Sched_onReturn() {
+void return_handler() { // Rename???
 	Sched->onReturn();
 }
 

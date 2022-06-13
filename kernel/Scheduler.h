@@ -46,7 +46,7 @@ class Scheduler;
 
 namespace Kernel {
 
-void Sched_onReturn();
+void return_handler();
 
 typedef enum ThreadPriority { // Priority levels for tasks
 	uninterruptible = -1,
@@ -114,10 +114,7 @@ union StateMgr {
  * |  R0  | <- SP after entering interrupt (orig. SP + 32 bytes)
  * +------+
  */
-struct TCB_Stack { // Rename????
-	// const uint32_t size; // Size of stack in bytes
-	uint8_t dummy[256 - 48]; // Dummy space for stack; hard set 256 bytes for now
-
+typedef struct TCB_Stack_Frame { // Rename????
 	// Initial stack contents
 	uint32_t r7, r6, r5, r4; // Pushed and popped by PendSV_Handler() to save and restore context
 	uint32_t r0, r1, r2, r3; // Return value register, scratch register, or argument register
@@ -125,14 +122,7 @@ struct TCB_Stack { // Rename????
 	uint32_t lr;   // Link register
 	uint32_t pc;   // Program counter
 	uint32_t xPSR; // Program status register
-
-	// TCB_Stack(uint32_t funcAddr) {
-	TCB_Stack() {
-		xPSR = 0x01000000; // Set xPSR to 0x01000000 (the default value)
-		lr = (uint32_t)&Sched_onReturn;
-		// pc = funcAddr; // Set PC to the thread function address
-	}
-};
+} stack_t; // Rename????
 
 /** NOTE: struct objects must be created during runtime to properly initialize */
 typedef struct TCB { // Thread control block
@@ -155,7 +145,8 @@ typedef struct TCB { // Thread control block
 	std::string name; // User defined name for the thread. Used to get a handle to the thread.
 	// char name[MAX_THREAD_NAME_LEN]; // User defined name for the thread. Used to get a handle to the thread.
 
-	TCB_Stack stack; // Stack with initialization values for the thread
+	// TCB_Stack stack; // Stack with initialization values for the thread
+	void* stack; // Stack with initialization values for the thread
 
 	TCB(std::string _name, TPri_t _priority, TState_t _state, int (*_func)(void), uint32_t _stackSize) {
 		name = _name; // Set name
@@ -163,8 +154,15 @@ typedef struct TCB { // Thread control block
 		priority = _priority; // Set priority
 		state = _state; // Set state manager
 
-		sp = (uint32_t)(&(stack.r7));
-		stack.pc = (uint32_t)func;
+		if (_stackSize < 48) _stackSize = 48; // Ensure that the stack is at least 48 bytes to accommodate the compiler saving registers on function entry (I need to find a way to tell gcc not to save registers on function entry because the context switch does it for us)
+		stack = malloc(_stackSize + sizeof(stack_t)); // Allocate stack size plus space for the stack frame
+		if (stack == NULL) { /** TODO: Add error handling in case memory is not allocated */ }
+		stack_t* frame = (stack_t*)((uint32_t)stack + _stackSize); // Get the stack frame from the top of the stack
+
+		sp = (uint32_t)frame;         // Set SP to the start of the stack frame
+		frame->pc = (uint32_t)func;            // Set PC to the function address
+		frame->xPSR = 0x01000000;              // Set xPSR to 0x01000000 (the default value)
+		frame->lr = (uint32_t)&return_handler; // Set LR to a return handler function
 	}
 } TCB_t;
 
@@ -215,7 +213,7 @@ public:
 	TCB* setActiveThread(); // Returns the highest priority thread that is not blocked
 	
 	/** TODO: Remove?? Replace?? */
-	void onReturn() { // Called when active thread returns
+	void onReturn() { // (Rename???) Called when active thread returns
 		threads.erase( std::find(threads.begin(),threads.end(),CurrentTCB) ); // Finds and removes the activeThread from the threads vector
 		// CurrentTCB = (TCB*)nullptr; // Clear activeThread pointer
 		CurrentTCB = main(); // Clear activeThread pointer (set to _MAIN thread)

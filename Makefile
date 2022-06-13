@@ -3,6 +3,8 @@
 SHELL := cmd.exe
 export SHELL
 
+include Config.mk
+
 
 BASE := cd C:/Users/Michael/Documents/Personal/Programing/Embedded\ Development/RP2040-Blink-UART &&
 
@@ -75,18 +77,6 @@ FLAGS_LD  := -Wl,--print-memory-usage,--gc-sections -T$(LINKER) --specs=nano.spe
 # --specs=nosys.specs: defines that system calls should be implemented as stubs that return errors when called
 # (--relax) (-fpic = position independent code)
 
-### -01
-# FLAGS_COM += -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-reference -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-phiprop -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time
-# FLAGS_COM += -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-reference                         -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-phiprop -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time        -fbranch-count-reg -fcombine-stack-adjustments -fcompare-elim -fforward-propagate -finline-functions-called-once -fipa-profile -fmerge-constants -fshrink-wrap -fsplit-wide-types -ftree-bit-ccp -fssa-phiopt -ftree-copy-prop -ftree-sink -ftree-slsr    # -fmove-loop-invariants
-### -02
-# FLAGS_COM += -fthread-jumps -falign-functions -falign-jumps -falign-loops  -falign-labels -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse-lm -finline-small-functions -findirect-inlining -fipa-sra -foptimize-sibling-calls -fpeephole2 -fregmove -freorder-blocks -freorder-functions -frerun-cse-after-loop -fsched-interblock -fsched-spec -fschedule-insns -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-switch-conversion -ftree-pre -ftree-vrp #-fgcse
-# FLAGS_COM += -fthread-jumps -falign-functions -falign-jumps -falign-loops  -falign-labels -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse-lm -finline-small-functions -findirect-inlining -fipa-sra -foptimize-sibling-calls -fpeephole2           -freorder-blocks -freorder-functions -frerun-cse-after-loop -fsched-interblock -fsched-spec -fschedule-insns -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-switch-conversion -ftree-pre -ftree-vrp       -fdevirtualize -fdevirtualize-speculatively -fhoist-adjacent-loads -fipa-cp -fipa-cp-alignment -fipa-icf -fisolate-erroneous-paths-dereference -flra-remat -foptimize-strlen -fpartial-inlining    -ftree-builtin-call-dce -ftree-tail-merge -fipa-ra #-fgcse    # not supported by this arch: -freorder-blocks-and-partition
-### -02 -fno-gcse -fno-move-loop-invariants
-# FLAGS_COM += -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-reference                         -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-phiprop -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time        -fbranch-count-reg -fcombine-stack-adjustments -fcompare-elim -fforward-propagate -finline-functions-called-once -fipa-profile -fmerge-constants -fshrink-wrap -fsplit-wide-types -ftree-bit-ccp -fssa-phiopt -ftree-copy-prop -ftree-sink -ftree-slsr    # -fmove-loop-invariants
-# FLAGS_COM += -fthread-jumps -falign-functions -falign-jumps -falign-loops  -falign-labels -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse-lm -finline-small-functions -findirect-inlining -fipa-sra -foptimize-sibling-calls -fpeephole2           -freorder-blocks -freorder-functions -frerun-cse-after-loop -fsched-interblock -fsched-spec -fschedule-insns -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-switch-conversion -ftree-pre -ftree-vrp       -fdevirtualize -fdevirtualize-speculatively -fhoist-adjacent-loads -fipa-cp -fipa-cp-alignment -fipa-icf -fisolate-erroneous-paths-dereference -flra-remat -foptimize-strlen -fpartial-inlining    -ftree-builtin-call-dce -ftree-tail-merge -fipa-ra #-fgcse    # not supported by this arch: -freorder-blocks-and-partition
-# FLAGS_KERNEL := -Og -fauto-inc-dec -fcprop-registers -fdce -fdefer-pop -fdelayed-branch -fdse -fguess-branch-probability -fif-conversion2 -fif-conversion -fipa-pure-const -fipa-reference                         -ftree-ccp -ftree-ch -ftree-copyrename -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-phiprop -ftree-sra -ftree-pta -ftree-ter -funit-at-a-time        -fbranch-count-reg -fcombine-stack-adjustments -fcompare-elim -fforward-propagate -finline-functions-called-once -fipa-profile -fmerge-constants -fshrink-wrap -fsplit-wide-types -ftree-bit-ccp -fssa-phiopt -ftree-copy-prop -ftree-sink -ftree-slsr    # -fmove-loop-invariants
-# FLAGS_KERNEL += -fthread-jumps -falign-functions -falign-jumps -falign-loops  -falign-labels -fcaller-saves -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks -fdelete-null-pointer-checks -fexpensive-optimizations -fgcse-lm -finline-small-functions -findirect-inlining -fipa-sra -foptimize-sibling-calls -fpeephole2           -freorder-blocks -freorder-functions -frerun-cse-after-loop -fsched-interblock -fsched-spec -fschedule-insns -fschedule-insns2 -fstrict-aliasing -fstrict-overflow -ftree-switch-conversion -ftree-pre -ftree-vrp       -fdevirtualize -fdevirtualize-speculatively -fhoist-adjacent-loads -fipa-cp -fipa-cp-alignment -fipa-icf -fisolate-erroneous-paths-dereference -flra-remat -foptimize-strlen -fpartial-inlining    -ftree-builtin-call-dce -ftree-tail-merge -fipa-ra #-fgcse    # not supported by this arch: -freorder-blocks-and-partition
-# FLAGS_KERNEL := -fno-gcse -fno-move-loop-invariants
 
 LIBS      := -lm -lstdc++ #-larm_cortexM7lfsp_math
 
@@ -264,11 +254,11 @@ $(KERNEL_LIB) : $(KERNEL_OBJ)
 
 # Shared Libraries ------------------------------------------------------------
 $(LIB_BIN)/%.s.o: $(LIBS_SHARED_BASE)/%.S
-	@echoLIB [ASM] $(notdir $<)
+	@echo LIB [ASM] $(notdir $<)
 	@"$(CC)" $(S_FLAGS) $(INCLUDE) -c "$<" -o "$@"
 
 $(LIB_BIN)/%.cpp.o: $(LIBS_SHARED_BASE)/%.cpp
-	@echoLIB [CPP] $(notdir $<)
+	@echo LIB [CPP] $(notdir $<)
 	@"$(CXX)" $(CPP_FLAGS) $(INCLUDE) -c "$<" -o "$@"
 
 $(LIB_BIN)/%.c.o: $(LIBS_SHARED_BASE)/%.c
@@ -277,15 +267,15 @@ $(LIB_BIN)/%.c.o: $(LIBS_SHARED_BASE)/%.c
 
 # Local Libraries -------------------------------------------------------------
 $(LIB_BIN)/%.s.o: $(LIBS_LOCAL_BASE)/%.S
-	@echoLIB [ASM] $(notdir $<)
+	@echo LIB [ASM] $(notdir $<)
 	@"$(CC)" $(S_FLAGS) $(INCLUDE) -c "$<" -o "$@"
 
 $(LIB_BIN)/%.cpp.o: $(LIBS_LOCAL_BASE)/%.cpp
-	@echoLIB [CPP] $(notdir $<)
+	@echo LIB [CPP] $(notdir $<)
 	@"$(CXX)" $(CPP_FLAGS) $(INCLUDE) -c "$<" -o "$@"
 
 $(LIB_BIN)/%.c.o: $(LIBS_LOCAL_BASE)/%.c
-	@echoLIB [CC]  $(notdir $<)
+	@echo LIB [CC] $(notdir $<)
 	@"$(CC)" $(C_FLAGS) $(INCLUDE) -c "$<" -o "$@"
 
 # Handle user sources ---------------------------------------------------------

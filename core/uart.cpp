@@ -77,8 +77,7 @@ uint32_t uart_read(uint32_t id, char *buff, uint32_t len) {
 	return i;
 }
 
-uint32_t uart_write(uint32_t id, char *buff, uint32_t len) {
-	uint32_t i;
+void uart_putc(uint32_t id, char c) {
 	volatile struct uart_hw *uart;
 
 	if (id == 0)
@@ -86,10 +85,23 @@ uint32_t uart_write(uint32_t id, char *buff, uint32_t len) {
 	else
 		uart = uart1;
 
-	for (i = 0; i < len; ++i) {
-		while (uart->fr & FR_TXFF);
+	while (uart->fr & FR_TXFF);
+	uart->dr = c;
+}
 
-		uart->dr = buff[i];
+uint32_t uart_write(uint32_t id, char *buff, uint32_t len) {
+	uint32_t i;
+	// volatile struct uart_hw *uart;
+
+	// if (id == 0)
+	// 	uart = uart0;
+	// else
+	// 	uart = uart1;
+
+	for (i = 0; i < len; ++i) {
+		// while (uart->fr & FR_TXFF);
+		// uart->dr = buff[i];
+		uart_putc(id, buff[i]);
 	}
 	return i;
 }

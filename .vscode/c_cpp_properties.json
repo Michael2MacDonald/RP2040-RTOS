@@ -4,7 +4,7 @@
 			"name": "RP2040-Blink-UART",
 			"includePath": [
 				"src",
-				"libs",
+				"libs/**",
 				"kernel",
 				"core",
 				"tools/arm/lib/**"
