@@ -1,3 +1,6 @@
+.vscode/*
+!.vscode/tasks.json
+
 /bin
 /other
 /dont compile
