@@ -1,21 +1,20 @@
 #include "kernel.h"
 #include "cm0plus.h"
-
 #include "cortex.h"
+#include <core.h> // MCU/system startup
+// void core_startup(); // From core\startup.cpp
 
 #include "Scheduler.h"
 
 #include <vector>
+#include <string>
 #include <cstring>
-
-// #include "nvic.h"
 
 extern uint32_t SVC_Handler_Table[256];
 
 extern "C" void SVC();
 extern "C" int main();
 extern "C" void enter_main();
-extern void core_startup(); // MCU/system startup
 
 extern "C" Kernel::TCB* CurrentTCB;
 
@@ -24,6 +23,14 @@ extern "C" {
 	bool* enabled;
 }
 
+// extern void __libc_init_array();
+
+// extern void (**__init_array_start)();
+// extern void (**__init_array_end)();
+// inline void static_init() {
+// 	for (void (**p)() = __init_array_start; p < __init_array_end; ++p)
+// 		(*p)();
+// }
 
 // extern "C" __attribute__((noreturn, section(".startup"), optimize("no-tree-loop-distribute-patterns")))
 extern "C" __attribute__((noreturn, section(".startup")))
@@ -36,7 +43,7 @@ void _startup(void) {
 	nvic_setpriority(SysTick_IRQn, 0); // Set Systick interrupt to the highest priority
 
 	/** TODO: Remove F_CPU_CURRENT entirely??? */
-	F_CPU_CURRENT = (6*1000000); // Startup at 6 MHz
+	// F_CPU_CURRENT = (6*1000000); // Startup at 6 MHz
 
 	/** Set the number of clock cycles between each systick interrupt
 	 * 120MHz = 120000000 = (120*1000000)
@@ -47,19 +54,24 @@ void _startup(void) {
 	systick_init(); // Initialize the systick timer
 	systick_set(120000);
 
-	// TODO: Setup CAN bus clock output (CLOCK_GPOUT1)
-	// div = (uint32_t) (((uint64_t) src_freq << 8) / freq);
-	// clock->div = div;
-
 	Kernel::Sched = new Kernel::Scheduler();
 	enabled = &(Kernel::Sched->enabled);
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
-	Kernel::Sched->create("_MAIN",256, &main, Kernel::none); // Create the main thread
-	CurrentTCB = Kernel::Sched->thread("_MAIN");
+	Kernel::Sched->create("_MAIN", 256, &main, Kernel::none); // Create the main thread
+	// CurrentTCB = Kernel::Sched->thread("_MAIN");
+	CurrentTCB = Kernel::Sched->threads[0];
 
-	// board_init();
-	// tusb_init();
+
+	// while(CurrentTCB == nullptr){asm volatile("nop");}
+	// while(Kernel::Sched->thread("_MAIN")->func == &main){asm volatile("nop");}
+	// while(Kernel::Sched->thread("_MAIN") == nullptr){asm volatile("nop");}
+	// while(Kernel::Sched->threads[0] == nullptr){asm volatile("nop");}
+	// while(Kernel::Sched->threads[0]->name == "_MAIN"){asm volatile("nop");}
+	// main();
+
+	/* Run constructors / initializers */
+	// __libc_init_array();
 
 	asm("dsb"); // Data synchronization barrier
 	asm("isb"); // Instruction synchronization barrier
@@ -68,7 +80,4 @@ void _startup(void) {
 	while (1) asm volatile("WFI"); // DON'T RETURN!!!!
 
 } /** END: _startup() */
-
-
-/** TODO: Move the following into the core folder */
 
