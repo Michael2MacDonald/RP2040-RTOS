@@ -15,7 +15,6 @@
 
 .extern SwitchContext // Define SwitchContext as an external function
 .extern CurrentTCB    // Define CurrentTCB as an external variable
-.extern _FAST    // Define CurrentTCB as an external variable
 
 
 /**
@@ -105,9 +104,8 @@ PendSV_Handler:
 
 	@ pop {r0}                // Push the value of the PSR onto the stack
 	@ msr psr, r0             // Move the Program status register to r0
-	
+
 	bx r0                   // Return from the handler (Uses the values in stack to load regesters and gets everything ready to run) (Branch and exchange instruction set??)
-	@ bx r3                   // Return from the handler (Uses the values in stack to load regesters and gets everything ready to run) (Branch and exchange instruction set??)
 
 .align 4 // ???? Is this needed???
 

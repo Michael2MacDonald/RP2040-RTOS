@@ -3,13 +3,12 @@
 .thumb
 
 .extern CurrentTCB // Points to the _MAIN thread's TCB on initialization
-.extern main // Function main()
 
 .section .text
 .align 2
 
 
-/** TODO: Rename this file and function */
+/** TODO: Rename this file and function to enter_threads??? */
 /** 
  * @brief Switches to PSP, sets the stack pointer to _MAIN's stack pointer, and jumps to main()
  */
@@ -30,7 +29,7 @@ enter_main:
 	mov lr, r1        // Set LR to the thread link register
 	
 	// Get the function address to jump to (Should be main() unless overwriten by user)
-	ldr r1, [r0, #40] // Get the function address fro2m the thread's stack
+	ldr r1, [r0, #40] // Get the function address from the thread's stack
 
 	// Set system mode for running threads
 	movs r0, #0 // Reset value of r0
