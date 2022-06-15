@@ -1,8 +1,6 @@
 #include "kernel.h"
-#include <rp2040.h>
 
 /** TODO: Move from C++ to C */
-
 
 // System Tick Counter: Increments every systick interrupt (1ms). Used by timing functions like delay().
 volatile uint32_t Ticks = 0; /** TODO: Rename */  // Ticks is incremented every systick interrupt (Can be reset)
