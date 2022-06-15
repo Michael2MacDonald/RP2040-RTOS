@@ -4,10 +4,12 @@
 /**
  * @file Kernel.h
  * @author Michael MacDonald <michael2macdonald@gmail.com>
- * @short Contains declarations for all user accessable classes, functions, variables, and macros
+ * @short Contains declarations for all user-space accessable classes, functions, variables, and macros
  * 
- * 
+ * @warning This file must stay compatible with C
+ * @todo Make this file compatible with C
  */
+
 
 #include <stdint.h>
 
@@ -24,15 +26,34 @@
  * -fsplit-stack
  */
 
-/** TODO: Make C compatible */
 
-// #include "common.h" // Include common.h
+/** TODO:
+ * Split the electrical system into "sections" (think of better terminology for this)
+ * - Power Management Controller (PMC)
+ * - High Voltage Supply (Batteries, charging, etc) (RENAME THIS!!!)
+ * - High Voltage Systems (Motor, etc) (RENAME THIS!!!)
+ * - Low Voltage Main System (Main Board, Nav sensors, coms, safety devices, etc) (RENAME THIS!!!)
+ * - Low Voltage Secondary System (Sensors, science, etc) (RENAME THIS!!!)
+ * 
+ * There will be a low-power MCU called the "Power Management Controller" or "PMC" (Rename??).
+ * It will be hardwired into all power sources (Solar, Battery, Charging Port, Data Port) so that if any part
+ * of the system is powered, the PMC will be powered. The high voltage systems will have hard disconnect switches
+ * and may have a software disconnect controlled by the PMC and mosfets or relays. If any of the hard disconnects
+ * are connected then the PMC will be powered.
+ * 
+ */
 
-// #include "cm0plus.h" // Cortex-M0+ definitions (Internal Peripherals, etc)
+// #include "cm0plus.h" // Cortex-M0+ hardware definitions
 // #include <rp2040.h>  // RP2040 definitions (Peripherals, etc)
 
 // #include "Scheduler.h" // Include Scheduler.h
 // #include "Components.h" // Include Components.h
+
+// #define F_REF          12000000
+// #define F_CPU          120000000
+// #define F_PER          120000000
+// #define F_RTC          (F_REF / 256)
+// #define F_TICK         1000000
 
 // #ifdef __cplusplus
 // extern "C" {
@@ -159,8 +180,6 @@ void reset_millis(uint32_t millis); // Set 'Ticks' to 'millis'
 /**===========================================================================
  * System Handlers And Interrupts
  * ===========================================================================*/
-
-void PendSV_Trigger(); /** TODO: Move to Kernel namespace */
 
 extern int32_t get_current_exception(); // Get the current exception number
 // extern void Default_Handler(); // Default handler for undefined interrupts

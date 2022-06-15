@@ -1,4 +1,5 @@
 
+#include <core.h>
 #include <resets.h>
 #include <gpio.h>
 #include <uart.h>
@@ -37,6 +38,10 @@ void core_startup() {
 	uart_setup();  // Setup UART
 }
 
+
+// TODO: Setup CAN bus clock output (CLOCK_GPOUT1)
+// div = (uint32_t) (((uint64_t) src_freq << 8) / freq);
+// clock->div = div;
 
 
 //--------------------------------------------------------------------+

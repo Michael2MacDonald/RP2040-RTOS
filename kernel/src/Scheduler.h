@@ -16,10 +16,6 @@
  * I don't think I will make it round robin
  */
 
-#ifndef ENABLE_THREAD_URGENCY
-	#define ENABLE_THREAD_URGENCY 0
-#endif
-
 #ifndef DEFAULT_THREAD_PRIORITY
 	#define DEFAULT_THREAD_PRIORITY normal // Default is used when a priority value is not given on task creation
 #endif
@@ -32,9 +28,9 @@
 
 #include <vector>
 #include <algorithm> // std::find
-#include <stdint.h>
+// #include <stdint.h>
 #include <string>
-// #include <cstring>
+#include <cstring>
 
 extern void PendSV_Trigger();
 
@@ -200,6 +196,7 @@ public:
 	// void init(); // Initialize the scheduler
 
 	int create(std::string name, int stackSize, int (*_func)(void), TPri_t priority = DEFAULT_THREAD_PRIORITY) {
+		if (name.length()>MAX_THREAD_NAME_LEN) { return -1; }
 		if (thread(name.c_str()) == nullptr) { // Check that name does not already exist
 			threads.push_back(new TCB(name, priority, queued, *_func, stackSize));
 			return 0;
@@ -225,7 +222,13 @@ public:
 	}
 
 	// Find the thread with the given name and return its pointer
-	TCB* thread(const char name[MAX_THREAD_NAME_LEN]) {
+	// TCB* thread(const char name[MAX_THREAD_NAME_LEN]) {
+	// 	for (uint16_t i = 0; i < threads.size(); i++)
+	// 		if (threads[i]->name == name) return threads[i];
+	// 	return nullptr;
+	// }
+	TCB* thread(const char *name) {
+		if (strlen(name) > MAX_THREAD_NAME_LEN) return nullptr;
 		for (uint16_t i = 0; i < threads.size(); i++)
 			if (threads[i]->name == name) return threads[i];
 		return nullptr;
@@ -250,7 +253,7 @@ public:
 	 * If a thread is unblocked and has a higher priority than the current thread, it will be
 	 * run. Otherwise the current thread will be resumed.
 	 */
-	void halt() { PendSV_Trigger(); } // Needed???? (rename yield()???)
+	void halt() { PendSV_Trigger(); } // Needed???? rename yield()???
 
 }; /** END: Class Scheduler */
 
@@ -258,34 +261,3 @@ public:
 
 
 #endif /** END: __KERNEL_SCHEDULER_H */
-
-
-
-
-// StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack, TaskFunction_t pxCode, void * pvParameters ) {
-//     /* Simulate the stack frame as it would be created by a context switch
-//      * interrupt. */
-
-//     /* Offset added to account for the way the MCU uses the stack on entry/exit
-//      * of interrupts, and to ensure alignment. */
-//     pxTopOfStack--;
-
-//     *pxTopOfStack = portINITIAL_XPSR;                                    /* xPSR */
-//     pxTopOfStack--;
-//     *pxTopOfStack = ( ( StackType_t ) pxCode ) & portSTART_ADDRESS_MASK; /* PC */
-//     pxTopOfStack--;
-//     *pxTopOfStack = ( StackType_t ) portTASK_RETURN_ADDRESS;             /* LR */
-
-//     /* Save code space by skipping register initialisation. */
-//     pxTopOfStack -= 5;                            /* R12, R3, R2 and R1. */
-//     *pxTopOfStack = ( StackType_t ) pvParameters; /* R0 */
-
-//     /* A save method is being used that requires each task to maintain its
-//      * own exec return value. */
-//     pxTopOfStack--;
-//     *pxTopOfStack = portINITIAL_EXC_RETURN;
-
-//     pxTopOfStack -= 8; /* R11, R10, R9, R8, R7, R6, R5 and R4. */
-
-//     return pxTopOfStack;
-// }

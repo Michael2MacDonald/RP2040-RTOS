@@ -10,7 +10,7 @@
 
 
 #define F_XOSC (12*1000000) // 12 MHz External Crystal Oscillator
-#define F_CPU (120*1000000) // (120 MHz) This is the target core clock frequency. This my not be the actual clock frequency before the clock is configured.
+// #define F_CPU (120*1000000) // (120 MHz) This is the target core clock frequency. This my not be the actual clock frequency before the clock is configured.
 
 
 
