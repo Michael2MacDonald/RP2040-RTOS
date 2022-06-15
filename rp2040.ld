@@ -16,6 +16,9 @@ SECTIONS {
 		_eboot2 = .;
 		_svectors = .;
 		KEEP(*(.vectors))  /* Reset vector table for arm exceptions and interupts */
+
+		_ssyslut = .;     /* OS system look up table?? Rename??? */
+		KEEP(*(.syslut))  /* Holds pointers to global variables and objects for OS operation (Including scheduler objects and configuration variables) */
 		_sservices = .;
 		KEEP(*(.services)) /* Service table for SVCall and PendSV service pointers */
 		. = ALIGN(1024);
@@ -44,6 +47,12 @@ SECTIONS {
 
 
 	.text.progmem : { /* Program memory */
+		. = ALIGN(4);
+		/** Static Allocation Support */
+		__init_array_start = .;
+		KEEP (*(.init_array*))
+		__init_array_end = .;
+
 		. = ALIGN(4);
 		*(.progmem*) /* Read-only data that should not be copied to ram */
 		. = ALIGN(4);
@@ -76,10 +85,12 @@ SECTIONS {
 		__bss_end__ = .; /* Used by standard library to zero out bss */
 	} > RAM
 
+	. = ALIGN(8);
 	_end = .;
 	end = _end;
 
 	.heap (NOLOAD): {
+		. = ALIGN(8);
 		_heap_start = .;
 		*(.heap*)
 		. = . + MAX_HEAP_SIZE;

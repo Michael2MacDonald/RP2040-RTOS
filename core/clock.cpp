@@ -1,4 +1,4 @@
-#include <kernel.h>
+// #include <kernel.h>
 #include "rp2040.h"
 #include "clock.h"
 
@@ -84,5 +84,5 @@ void clock_setup() {
 	// Enable clock for RTC and set source to 'xosc_clksrc'
 	CLOCKS->CLK_RTC_CTRL = CLOCKS_CLK_RTC_CTRL_ENABLE_Msk | (CLOCKS_CLK_RTC_CTRL_AUXSRC_xosc_clksrc << CLOCKS_CLK_ADC_CTRL_AUXSRC_Pos);
 
-	F_CPU_CURRENT = (120*1000000); // Set the current CPU clock frequency to 120 MHz for reference
+	// F_CPU_CURRENT = (120*1000000); // Set the current CPU clock frequency to 120 MHz for reference
 }

@@ -112,7 +112,8 @@ data_cpy_table:
 zero_bss: // Zero out the BSS
 	ldr r1, =_sbss
 	ldr r2, =_ebss
-	movs r0, #0
+	@ ldr r2, =_stack
+	movs r0, #0x00
 	b bss_fill_test
 bss_fill_loop:
 	stm r1!, {r0}
@@ -138,12 +139,6 @@ trap_fill_test:
 
 
 
-
-
-@ .global _startup
-@ .type _startup,%function
-@ .thumb_func
-@ _startup
 
 
 
@@ -186,90 +181,3 @@ trap_fill_test:
 	@ MSR     PRIMASK,r0      // Restore the original PRIMASK
 
 
-
-
-
-
-
-@ @ .global reset_handler
-@ @ .section .text
-@ @ .type	reset_handler,%function
-@ @ reset_handler:
-@ @ 	ldr r0, =0x20001000
-@ @ 	mov sp, r0
-
-@ @ 	bl init ; change to main?
-@ @ 	b .
-
-@ @ .align
-@ @ .ltorg
-@ @ .balign 0x100
-
-
-
-@ @ .cpu cortex-m0
-@ @ .thumb
-
-@ .text
-@ .align
-@ .global Reset_Handler
-@ .type Reset_Handler, %function
-@ Reset_Handler:
-@ 	b main
-
-@ .section .isr_vectors
-@ .align 2
-@ .long __stack_top
-@ .long Reset_Handler
-@ .long NMI_Handler
-@ .long HardFault_Handler
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long SVCall_Handler
-@ .long 0
-@ .long 0
-@ .long PendSV_Handler
-@ .long SysTick_Handler
-@ .long 0
-
-@ /* IRQ 0 */
-@ .long SPI0_IRQ
-@ .long SPI1_IRQ
-@ .long 0
-@ .long UART0_IRQ
-@ .long UART1_IRQ
-@ .long UART2_IRQ
-@ .long 0
-@ .long 0
-@ /* IRQ 8 */
-@ .long I2C0_IRQ
-@ .long SCT_IRQ
-@ .long MRT_IRQ
-@ .long CMP_IRQ
-@ .long WDT_IRQ
-@ .long BOD_IRQ
-@ .long 0
-@ .long WKT_IRQ
-@ /* IRQ 16 */
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ .long 0
-@ /* IRQ 24 */
-@ .long PININT0_IRQ
-@ .long PININT1_IRQ
-@ .long PININT2_IRQ
-@ .long PININT3_IRQ
-@ .long PININT4_IRQ
-@ .long PININT5_IRQ
-@ .long PININT6_IRQ
-@ .long PININT7_IRQ
