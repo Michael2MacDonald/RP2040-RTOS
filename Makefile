@@ -4,60 +4,10 @@ SHELL := cmd.exe
 export SHELL
 
 include Config.mk
+include Board.mk
 
 
-BASE := cd C:/Users/Michael/Documents/Personal/Programing/Embedded\ Development/RP2040-Blink-UART &&
-
-# Name of the outputted binary files (<TARGET_NAME>.elf, <TARGET_NAME>.lst, etc)
-TARGET_NAME := blink
-
-LINKER := rp2040.ld
-MKUF2  := mkuf2
-
-# Compiler Optimization Level -------------------------------------------------
-# -O<Opt> (Ex: Faster = -O2)
-# Debug:   g
-# Default: 0
-# Fast:    1
-# Faster:  2 (Recommended Default)
-# Fastest: 3
-# Small Code:    s (Enables all -O2 optimizations except those that often increase code size)
-# Smallest Code: z (Optimize aggressively for size rather than speed. Similar to -Os)
-# OPT := 3
-OPT := 2
-# OPT := 1
-# OPT := 0
-# OPT := g
-# OPT := s
-
-# -Og 12856 1296
-# -O0 17580 1408
-# -O1 12832 1296
-# -O2 12652 1296
-# -O3  6904 1232
-# -Os 12500 1296
-
-# -O3                           6904 1232
-# -O3 with move-loop-invariants 6884 1232
-# -O3 with gcse                 6920 1232
-
-
-# Shared Libraries ------------------------------------------------------------
-# For if you have a folder of libraries that you share across many projects
-LIBS_SHARED_BASE :=
-LIBS_SHARED      := 
-# Project Specific Libraries --------------------------------------------------
-LIBS_LOCAL_BASE  := libs
-LIBS_LOCAL       :=
-
-OBJDUMP_FLAGS    := -d -C #-S -r
-# -d: Disassemble
-# -r: Shows symbol names on relocations
-# -R: Shows dynamic-linking relocations / symbol names (useful on shared libraries)
-# -C: Demangles C++ symbol names
-# -S: Interleave source lines with disassembly. Implies -d. (--no-show-raw-insn: don't show raw instructions)
-# -w: "Wide" mode: don't line-wrap the machine-code bytes
-# -Mintel: use GAS/binutils MASM-like .intel_syntax noprefix syntax instead of AT&T
+# BASE := cd C:/Users/Michael/Documents/Personal/Programing/Embedded\ Development/RP2040-Blink-UART &&
 
 
 #******************************************************************************
@@ -65,22 +15,21 @@ OBJDUMP_FLAGS    := -d -C #-S -r
 #******************************************************************************
 FLAGS_CPU := -mthumb -mcpu=cortex-m0plus -mabi=aapcs #-mfloat-abi=hard -mfpu=fpv5-d16
 FLAGS_OPT := -O$(OPT) #-fno-inline #-fno-gcse #-fno-move-loop-invariants
-FLAGS_COM := -g -Wall -Wextra -Wno-unused-parameter -Wunsafe-loop-optimizations -Wstack-usage=256 -ffunction-sections -fdata-sections -MMD -ffixed-r9 -nostdlib #--verbose
-FLAGS_LSP := 
+FLAGS_COM := -g -Wall -Wextra -Wno-unused-parameter -Wunsafe-loop-optimizations -Wstack-usage=256 -ffunction-sections -fdata-sections -MMD -ffixed-r9 #-nostdlib #--verbose
+FLAGS_LSP :=  
 
 FLAGS_S   := #-x assembler-with-cpp
 FLAGS_C   := #-std=gnu11
 FLAGS_CPP := -std=gnu++14 -fno-exceptions -fpermissive -fno-rtti -felide-constructors -Wno-error=narrowing #-fno-threadsafe-statics
-FLAGS_LD  := -Wl,--print-memory-usage,--gc-sections -T$(LINKER) --specs=nano.specs --specs=nosys.specs -nostartfiles
-# FLAGS_LD  += -Wl,--specs=rdimon.specs # Enable rdimon.specs for debugging (Enables semihosting which allows you to use system calls and printf by passing them to the host computer via the debugger)
+FLAGS_LD  := -T$(LINKER) -Wl,--print-memory-usage,--gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles #-nostdlib 
+# --specs=rdimon.specs: Enables semihosting which allows you to use system calls and printf by passing them to the host computer via the debugger
 # --specs=nano.specs: use newlib-nano
 # --specs=nosys.specs: defines that system calls should be implemented as stubs that return errors when called
 # (--relax) (-fpic = position independent code)
 
+LIBS      := -lm -lstdc++ #-L./libs -L../libs -L../../libs -lcore #-larm_cortexM7lfsp_math
 
-LIBS      := -lm -lstdc++ #-larm_cortexM7lfsp_math
-
-DEFINES   := -DLOW_REGS_ONLY=1 #-D$(MCU_DEF) -D$(BOARD_DEF)
+DEFINES   := $(CFG_DEFINES) $(BOARD_DEFINES) -DLOW_REGS_ONLY=1
 
 CPP_FLAGS := $(FLAGS_CPU) $(FLAGS_OPT) $(FLAGS_COM) $(DEFINES) $(FLAGS_CPP)
 C_FLAGS   := $(FLAGS_CPU) $(FLAGS_OPT) $(FLAGS_COM) $(DEFINES) $(FLAGS_C)
@@ -106,11 +55,11 @@ CORE_SRC        := core
 
 # BIN             := $(BASE)/bin
 BIN             := bin
-USR_BIN         := $(BIN)/src
-LIB_BIN         := $(BIN)/libs
-KERNEL_BIN      := $(BIN)/kernel
+USR_BIN         := $(BIN)/$(USR_SRC)
+LIB_BIN         := $(BIN)/$(LIB_SRC)
+KERNEL_BIN      := $(BIN)/$(KERNEL_SRC)
 KERNEL_LIB      := $(BIN)/kernel.a
-CORE_BIN        := $(BIN)/core
+CORE_BIN        := $(BIN)/$(CORE_SRC)
 CORE_LIB        := $(BIN)/core.a
 TARGET_HEX      := $(BIN)/$(TARGET_NAME).hex
 TARGET_BIN      := $(BIN)/$(TARGET_NAME).bin
@@ -293,7 +242,8 @@ $(USR_BIN)/%.cpp.o: $(USR_SRC)/%.cpp
 
 # Linking ---------------------------------------------------------------------
 # $(TARGET_ELF): $(CORE_LIB) $(KERNEL_LIB) $(LIB_OBJ) $(USR_OBJ)
-$(TARGET_ELF): $(USR_OBJ) $(LIB_OBJ) $(CORE_OBJ) $(KERNEL_LIB) #$(CORE_LIB)
+$(TARGET_ELF): $(USR_OBJ) $(LIB_OBJ) $(CORE_OBJ) $(KERNEL_OBJ)
+# $(TARGET_ELF): $(USR_OBJ) $(LIB_OBJ) $(CORE_LIB) $(KERNEL_LIB) #$(CORE_LIB)
 	@echo [LD] $@
 # LIBS MUST BE THE LAST ITEM OR IT WILL NOT LINK CORRECTLY!!!!
 	@"$(CC)" $(LD_FLAGS) -o "$@" $(USR_OBJ) $(LIB_OBJ) $(CORE_OBJ) $(KERNEL_OBJ) $(LIBS)
