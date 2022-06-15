@@ -3,29 +3,74 @@
  * @author Michael MacDonald <michael2macdonald@gmail.com>
  * @short 
  * 
+ * @todo Implement some sort of exit or abort function???
  */
 
 #include "kernel.h"    // Include the kernel header file
 #include "cm0plus.h"   // Include Cortex-M0+ header file
+#include "cortex.h"    // Include Cortex-M0+ header file
 #include "Scheduler.h" // Include scheduler header file
 // #include "Components/Components.h" // Include components
 
 uint64_t F_CPU_CURRENT; // This is the clock frequency that the device is currently configured for. It must be set by the application code whenever the clock frequency changes.
 
 
-void PendSV_Trigger() {
-	SCB->ICSR |= (1 << 28); // Set PendSV to pending
+/** TODO: Move init() to startup() and replace user accessable loop() with main()??? */
+extern "C" int main() { // Main
+	// while(1);
+	init(); // User setup
+
+	/** TODO: Check if this core should start the scheduler not */
+	Kernel::Sched->enabled = true; // Enable the scheduler
+
+	while(1){ loop(); }
+	return 0;
 }
 
 
-// Kernel::Scheduler Sched; // created in Scheduler.h
-// Kernel::Scheduler* Sched = Kernel::Scheduler::initialize(); // Create Scheduler object
-// namespace Kernel {
-// 	Scheduler* Sched = Scheduler::initialize(); // Create Scheduler object
-// }
+/**===========================================================================
+ * System Interupts
+ * ===========================================================================*/
+
+extern "C" __attribute__((used, weak))
+void Default_Handler() { // Defined in assembly file. Can be overwritten by the user.
+	return;
+}
+
+extern "C" __attribute__((used, weak, alias("Default_Handler")))
+void NMI_Handler();
+
+extern "C" __attribute__((used, weak, alias("Default_Handler")))
+void HardFault_Handler();
+
+extern "C" __attribute__((used, weak, alias("Default_Handler")))
+void SVCall_Handler();
+
+extern volatile uint32_t Ticks, Uptime, Millis, Micros;
+extern "C" __attribute__((weak))
+void systick_hook() { return; } // Allows users or libraries to run code in the systick interrupt handler
+
+extern "C" __attribute__((used))
+void SysTick_Handler() { // Runs every 1ms as defined in startup.c
+	// Increment Ticks, Uptime, Millis, and Micros for delays and other functions
+	Ticks++; Uptime++; Millis++; Micros++;
+	/** TODO: Increment Millis and Micros based off of ticks and the Systick interval */
+
+	if (Kernel::Sched->enabled == true && ((SCB->ICSR & SCB_ICSR_PENDSVSET_Msk) >> SCB_ICSR_PENDSVSET_Pos) != 1) { // only run if scheduler is enabled and no PendSV interrupt is pending
+	// if (Kernel::Sched->enabled == true) { // only run if scheduler is enabled and no PendSV interrupt is pending
+		PendSV_Trigger(); // Call PendSV to switch context
+	}
+
+	systick_hook(); // Call the user defined systick hook
+}
+
+// extern "C" __attribute__((used, weak))
+// void PendSV_Handler(); // DO NOT DEFINE!!! Defined in assembly file
 
 
-// using namespace Kernel;
+
+
+
 
 // void Kernel::init() {
 
@@ -38,29 +83,4 @@ void PendSV_Trigger() {
 // 	// Run user defined init hook
 // 	Init_Hook(); /** TODO: Check for errors */
 	
-// }
-
-// __attribute__((always_inline))
-// inline void Kernel::PendSV_Trigger() {
-// 	// Set the PendSV exception as pending by setting bit 28 of the ICSR register
-// 	SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
-// }
-
-
-// extern "C" void SwitchContext() { // Rename?? Move??
-// 	/** TODO:
-// 	 * - Increment systick (Not needed; done by systick handler)
-// 	 * - Check for stack overflow
-// 	 * - Check for suspended threads
-// 	 * 	- vDelays
-// 	 * 	- waiting for resources
-// 	 * 	- etc
-// 	 * - Check tasks that are waiting
-// 	 * 	- delay
-// 	 * 	- interupt
-// 	 * 	- event
-// 	 * - check events???
-// 	 * - Find the highest priority thread and set CurrentTCB to that thread
-// 	 * 
-// 	 */
 // }

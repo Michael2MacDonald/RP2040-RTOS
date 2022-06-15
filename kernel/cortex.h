@@ -1,5 +1,5 @@
-#ifndef __ARM_UTIL_H
-#define __ARM_UTIL_H
+#ifndef __CORTEX_H
+#define __CORTEX_H
 
 #include "cm0plus.h"
 
@@ -22,6 +22,7 @@ void systick_deinit();             // Disable Systick
 void systick_set(uint32_t value);  // Set systick reload value and clear the counter
 uint32_t systick_get();            // Get the current value of the Systick counter
 
+void PendSV_Trigger();
 
 /**===========================================================================
  * Nested Vectored Interrupt Controller (NVIC) Functions And Structs
@@ -73,7 +74,7 @@ typedef enum IRQn {
 	Device29_IRQn,
 	Device30_IRQn,
 	Device31_IRQn
-} IRQn_Type; // Rename IRQn_Type to IRQn_t ????
+} IRQn_t;
 
 void nvic_init();
 void nvic_register_irq(uint32_t irq, void (*handler)());
@@ -81,7 +82,7 @@ void nvic_enable(uint32_t irq);
 void nvic_disable(uint32_t irq);
 void nvic_setpending(uint32_t irq);
 void nvic_clearpending(uint32_t irq);
-void nvic_setpriority(IRQn_Type IRQn, uint32_t priority);
+void nvic_setpriority(IRQn_t IRQn, uint32_t priority);
 
 // __attribute__((weak)) // Overridden by ASM function in 'SVC.S'
 uint32_t SVC_(uint32_t svc_num, uint32_t *args);
@@ -92,4 +93,4 @@ uint32_t SVC(uint32_t svc_num);
 // }; /** END: extern "C" */
 // #endif
 
-#endif /** END: __ARM_UTIL_H */
+#endif /** END: __CORTEX_H */

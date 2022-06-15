@@ -1,6 +1,8 @@
 #ifndef __CM0PLUS_H
 #define __CM0PLUS_H
 
+/** TODO: Rename to cortex_hw.h ??? */
+
 #include "kernel.h"
 
 

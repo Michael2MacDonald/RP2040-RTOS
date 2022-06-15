@@ -39,7 +39,7 @@ extern "C" int blink_led_loop() {
 extern char * dtoa(char *s, double n);
 extern "C" int heartbeat() {
 	while(1) {
-		// uart_print("I am alive!\n");
+		uart_print("I am alive!\n\r");
 		// printf("Vessel Status: Operational\n");
 		Kernel::Sched->sleep(5000);
 	}
@@ -51,8 +51,8 @@ extern "C" int strobe_light() {
 		// Kernel::Sched->sleep(250);
 		delay(250);
 		gpio_set(STROBE, LOW);
-		delay(2000);
-		// Kernel::Sched->sleep(2000);
+		// delay(2000);
+		Kernel::Sched->sleep(2000);
 	}
 }
 
@@ -68,6 +68,7 @@ extern "C" int fetch_heading_thread() {
 		// uart_print(msg);
 		// uart_print("\n");
 		// printf("Heading: %f\n", VesselHeading);
+		Kernel::Sched->sleep(5000);
 	}
 }
 
@@ -92,8 +93,9 @@ extern "C" void init() {
 // Main loop runs at the lowest priority when no other threads are running
 extern "C" void loop() {
 	// printf("Hello World\n");
-	// delay(1000);
-	blink_led();
+	uart_print("Hello World\n\r");
+	delay(1000);
+	// blink_led();
 } /** END: loop() */
 
 // Rapid blink to indicate a hardfault has occurred (For debugging purposes)

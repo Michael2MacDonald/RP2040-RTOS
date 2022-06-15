@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "cm0plus.h"
 
-#include "include/ArmUtil.h"
+#include "cortex.h"
 
 #include "Scheduler.h"
 

@@ -8,22 +8,18 @@
 #include "kernel.h"
 #include "Scheduler.h"
 
+#include "cortex.h" // PendSV_Trigger()
+
 #include <algorithm>
 #include <vector>
-
-extern "C" void HardFault_Handler(void);
 
 // Extern "C" allows the variable to be visable by the 'PendSVHandler.S' assembly file
 extern "C" {
 	volatile Kernel::TCB* CurrentTCB; // Pointer to the current TCB
 }
-extern "C" Kernel::TCB_t* _FAST;
-extern "C" Kernel::TCB_t* _MAIN;
-extern void PendSV_Trigger();
 
 namespace Kernel {
 
-// Core_t Core; // Create Core object
 Scheduler* Sched; // Create Scheduler object
 
 // Declare outside of class
@@ -54,7 +50,6 @@ Scheduler* Sched; // Create Scheduler object
 
 
 void Scheduler::block() { // Block the current thread
-
 	// Disable interrupts to prevent systick from triggering PendSV which might try to read CurrentTCB->state while we are modifying it
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
@@ -62,24 +57,19 @@ void Scheduler::block() { // Block the current thread
 	// CurrentTCB->stateMgr = nullptr;
 	PendSV_Trigger(); // Trigger PendSV to switch to another thread
 
-	asm volatile("dsb"); // Data Synchronization Barrier
-	asm volatile("isb"); // Instruction Synchronization Barrier
+	asm volatile("dsb \n isb"); // Data & Instruction Synchronization Barriers
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
-
 void Scheduler::block(TCB* thread) { // Block the current thread
-
 	// Disable interrupts to prevent systick from triggering PendSV which might try to read CurrentTCB->state while we are modifying it
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
 
 	thread->state = blocked; // Set the current thread's state to blocked
 	// thread->stateMgr = nullptr; // Set the current thread's stateMgr to nullptr
 
-	asm volatile("dsb"); // Data Synchronization Barrier
-	asm volatile("isb"); // Instruction Synchronization Barrier
+	asm volatile("dsb \n isb"); // Data & Instruction Synchronization Barriers
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
-
 void Scheduler::unblock(TCB* thread) { // Unblock a thread
 	// Disable interrupts to prevent systick from triggering PendSV which might try to read thread->state while we are modifying it
 	asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
@@ -88,8 +78,7 @@ void Scheduler::unblock(TCB* thread) { // Unblock a thread
 	// thread->stateMgr = nullptr; // Set the thread's stateMgr to nullptr
 	PendSV_Trigger(); // Trigger PendSV to switch to make sure the unblocked thread preempts the current thread if it has a higher priority
 
-	asm volatile("dsb"); // Data Synchronization Barrier
-	asm volatile("isb"); // Instruction Synchronization Barrier
+	asm volatile("dsb \n isb"); // Data & Instruction Synchronization Barriers
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
 void Scheduler::sleep(uint32_t msec) { // Unblock a thread
@@ -101,8 +90,7 @@ void Scheduler::sleep(uint32_t msec) { // Unblock a thread
 	CurrentTCB->stateMgr.sleep.start = millis();
 	PendSV_Trigger(); // Trigger PendSV to switch to make sure the unblocked thread preempts the current thread if it has a higher priority
 
-	asm volatile("dsb"); // Data Synchronization Barrier
-	asm volatile("isb"); // Instruction Synchronization Barrier
+	asm volatile("dsb \n isb"); // Data & Instruction Synchronization Barriers
 	asm volatile("cpsie i"); // Enable interrupts (clear PRIMASK)
 }
 
@@ -166,7 +154,6 @@ void Scheduler::updateThreads() {
  * 
  */
 extern "C" uint32_t SwitchContext() { // Rename??
-
 	// Check if any threads need to exit from sleeping or waiting
 	Sched->updateThreads();
 	// Set the currently selected thread to the highest priority thread that is not blocked
