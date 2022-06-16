@@ -49,7 +49,7 @@ NM_FLAGS  := --numeric-sort --defined-only --demangle --print-size
 # # CORE_SRC        := $(BASE)/$(CORE_BASE)
 USR_SRC         := src
 LIB_SRC         := libs
-KERNEL_SRC      := kernel
+KERNEL_SRC      := kernel/src
 CORE_SRC        := core
 # CORE_SRC        := $(CORE_BASE)
 
