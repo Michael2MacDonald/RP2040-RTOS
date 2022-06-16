@@ -10,8 +10,6 @@
 #include <string>
 #include <cstring>
 
-extern uint32_t SVC_Handler_Table[256];
-
 extern "C" void SVC();
 extern "C" int main();
 extern "C" void enter_main();
@@ -59,8 +57,8 @@ void _startup(void) {
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
 	Kernel::Sched->create("_MAIN", 256, &main, Kernel::none); // Create the main thread
-	// CurrentTCB = Kernel::Sched->thread("_MAIN");
-	CurrentTCB = Kernel::Sched->threads[0];
+	CurrentTCB = Kernel::Sched->thread("_MAIN");
+	// CurrentTCB = Kernel::Sched->threads[0];
 
 
 	// while(CurrentTCB == nullptr){asm volatile("nop");}

@@ -1,12 +1,8 @@
-/** WARNING:
- * Only include this header file from assembly code!!!
- */
-
 .syntax unified
 .cpu cortex-m0plus
 .thumb
 
-
+// Arm Cortex Handlers are defined in Kernel.cpp
 .extern Reset_Handler
 .extern NMI_Handler
 .extern HardFault_Handler
@@ -14,10 +10,9 @@
 .extern PendSV_Handler
 .extern SysTick_Handler
 
-
+// =============== Vector Table ===============
 .section .vectors, "ax"
 .align 2
-
 .global vector_table
 vector_table:
 	.word _stack
@@ -69,35 +64,7 @@ vector_table:
 	.word isr_irq30
 	.word isr_irq31
 
-// all default exception handlers do nothing, and we can check for them being set to our
-// default values by seeing if they point to somewhere between __defaults_isrs_start and __default_isrs_end
-@ .global __default_isrs_start
-@ __default_isrs_start:
-
-// Declare a weak symbol for each ISR.
-// By default, they will fall through to the undefined IRQ handler below (breakpoint),
-// but can be overridden by C functions with correct name.
-
-@ .macro decl_isr_bkpt name
-@ 	.global \name
-@ 	.weak \name
-@ 	.type \name,%function
-@ 	.thumb_func
-@ 	\name:
-@ 		bkpt #0
-@ .endm
-
-// these are separated out for clarity
-@ decl_isr_bkpt NMI_Handler
-@ decl_isr_bkpt HardFault_Handler
-@ decl_isr_bkpt SVCall_Handler
-@ decl_isr_bkpt PendSV_Handler
-@ decl_isr_bkpt SysTick_Handler
-
-@ .global __default_isrs_end
-@ __default_isrs_end:
-
-
+// =============== Define Interupt Handlers ===============
 .macro decl_isr name
 	.weak \name
 	.type \name,%function
@@ -163,4 +130,3 @@ get_current_exception:
 	uxtb r0, r0  // Zero Extend to 32 bits
 	subs r0, #16 // Subtract 16 to get the exception number
 	bx lr        // Return
-
