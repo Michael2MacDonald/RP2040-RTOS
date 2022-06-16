@@ -1,11 +1,9 @@
 /.vscode/*
 !/.vscode/tasks.json
 
-/bin
+/bin/**/*
 /other
-/dont compile
-/kernel/wip
-/src/Other
-/src/sdk
+/dont-compile
+/kernel/wip/**/*
 
 Files.md
