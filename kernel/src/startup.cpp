@@ -67,7 +67,7 @@ void _startup(void) {
 	// while(Kernel::Sched->thread("_MAIN")->func == &main){asm volatile("nop");}
 	// while(Kernel::Sched->thread("_MAIN") == nullptr){asm volatile("nop");}
 	// while(Kernel::Sched->threads[0] == nullptr){asm volatile("nop");}
-	while(Kernel::Sched->threads[0]->name == "_MAIN"){asm volatile("nop");}
+	// while(Kernel::Sched->threads[0]->name == "_MAIN"){asm volatile("nop");}
 	// main();
 
 	/* Run constructors / initializers */

@@ -113,7 +113,7 @@ zero_bss: // Zero out the BSS
 	ldr r1, =_sbss
 	ldr r2, =_ebss
 	@ ldr r2, =_stack
-	movs r0, #0x00
+	movs r0, #0
 	b bss_fill_test
 bss_fill_loop:
 	stm r1!, {r0}
