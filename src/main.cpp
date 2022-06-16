@@ -51,7 +51,6 @@ extern "C" int strobe_light() {
 		// Kernel::Sched->sleep(250);
 		delay(250);
 		gpio_set(STROBE, LOW);
-		// delay(2000);
 		Kernel::Sched->sleep(2000);
 	}
 }
