@@ -14,20 +14,21 @@ include Board.mk
 # Flags and Defines
 #******************************************************************************
 FLAGS_CPU := -mthumb -mcpu=cortex-m0plus -mabi=aapcs #-mfloat-abi=hard -mfpu=fpv5-d16
-FLAGS_OPT := -O$(OPT) #-fno-inline #-fno-gcse #-fno-move-loop-invariants
-FLAGS_COM := -g -Wall -Wextra -Wno-unused-parameter -Wunsafe-loop-optimizations -Wstack-usage=256 -ffunction-sections -fdata-sections -MMD -ffixed-r9 #-nostdlib #--verbose
+FLAGS_OPT := -O$(OPT)
+FLAGS_COM := -g -MMD -Wall -Wextra -Wno-unused-parameter -Wunsafe-loop-optimizations -Wstack-usage=256 -ffunction-sections -fdata-sections #--verbose
 FLAGS_LSP :=  
 
-FLAGS_S   := #-x assembler-with-cpp
-FLAGS_C   := #-std=gnu11
+FLAGS_S   := -x assembler-with-cpp
+FLAGS_C   := -std=gnu11
 FLAGS_CPP := -std=gnu++14 -fno-exceptions -fpermissive -fno-rtti -felide-constructors -Wno-error=narrowing #-fno-threadsafe-statics
-FLAGS_LD  := -T$(LINKER) -Wl,--print-memory-usage,--gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles #-nostdlib 
+FLAGS_LD  := -T$(LINKER) -Wl,--print-memory-usage,--gc-sections --specs=nano.specs --specs=nosys.specs #-nostartfiles #-nostdlib 
 # --specs=rdimon.specs: Enables semihosting which allows you to use system calls and printf by passing them to the host computer via the debugger
 # --specs=nano.specs: use newlib-nano
 # --specs=nosys.specs: defines that system calls should be implemented as stubs that return errors when called
 # (--relax) (-fpic = position independent code)
 
-LIBS      := -lm -lstdc++ #-L./libs -L../libs -L../../libs -lcore #-larm_cortexM7lfsp_math
+LIBS      := -lm -lstdc++
+#-larm_cortexM7lfsp_math
 
 DEFINES   := $(CFG_DEFINES) $(BOARD_DEFINES) -DLOW_REGS_ONLY=1
 
@@ -49,7 +50,7 @@ NM_FLAGS  := --numeric-sort --defined-only --demangle --print-size
 # # CORE_SRC        := $(BASE)/$(CORE_BASE)
 USR_SRC         := src
 LIB_SRC         := libs
-KERNEL_SRC      := kernel/src
+KERNEL_SRC      := kernel
 CORE_SRC        := core
 # CORE_SRC        := $(CORE_BASE)
 
@@ -141,7 +142,7 @@ LIB_OBJ         += $(LIB_C_SHARED:$(LIBS_SHARED_BASE)/%.c=$(LIB_BIN)/%.c.o)  $(L
 LIB_OBJ         += $(LIB_S_SHARED:$(LIBS_SHARED_BASE)/%.S=$(LIB_BIN)/%.s.o)  $(LIB_S_LOCAL:$(LIBS_LOCAL_BASE)/%.S=$(LIB_BIN)/%.s.o)
 
 # Includes -------------------------------------------------------------
-INCLUDE         := -I$(USR_SRC) -I$(CORE_SRC) -I$(KERNEL_SRC) #-include kernel/common.h
+INCLUDE         := -I$(USR_SRC) -I$(CORE_SRC) -I$(KERNEL_SRC)
 INCLUDE         += $(foreach d, $(LIB_DIRS_SHARED), -I$d)
 INCLUDE         += $(foreach d, $(LIB_DIRS_LOCAL), -I$d)
 
