@@ -8,6 +8,12 @@ volatile uint32_t Uptime = 0; /** TODO: Rename */ // Milliseconds since the syst
 volatile uint32_t Millis = 0; // Counts up in milliseconds (May be reset)
 volatile uint32_t Micros = 0; // Counts up in microseconds (May be reset)
 
+/** TODO:
+ * wait(): Delays without surrendering the CPU to other threads
+ * (Version of wait that is a raw delay and a version that takes into account the time spent in other threads when preempted)
+ * delay(): Surrenders the CPU to other threads for a given number of milliseconds
+ * (A way to block all threads for a given number of milliseconds)
+ */
 
 void delay(uint32_t msec) {
 	if (msec == 0) return;

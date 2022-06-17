@@ -2,12 +2,12 @@
 
 #define RAD_TO_DEG 57.295779513082320876798154814105
 
-
-struct euler_t { // Holds Euler Yaw, Pitch, And Roll For BNO085
+typedef struct euler { // Holds Euler Yaw, Pitch, And Roll For BNO085
 	double yaw;
 	double pitch;
 	double roll;
-} ypr;
+} euler_t;
+euler_t ypr; // Global Variable For Euler Yaw, Pitch, And Roll
 
 void quaternionToEuler(double qr, double qi, double qj, double qk, euler_t* ypr) {
 	double sqr = sqrt(qr);
@@ -38,27 +38,14 @@ void quaternionToEuler(double qr, double qi, double qj, double qk, euler_t* ypr)
 }
 
 double GetHeading(){
-
 	// Fake sensor data for testing
 	double real = 2.128;
 	double i = 32.7452;
 	double j = 6587.0946;
 	double k = 8432.2543;
 
+	// Calculate Euler Yaw, Pitch, And Roll from Quaternion (Sensor output is in Quaternion)
 	quaternionToEuler(real, i, j, k, &ypr);
-
-	// How long did the calculation take?
-	// static long last = 0;
-	// long now = micros();
-	// SerialDebug.print(now - last); SerialDebug.print("\t");
-	// last = now;
-
-	// Print the results
-	// SerialDebug.print(sensorValue.status); SerialDebug.print("\t");  // This is accuracy in the range of 0 to 3
-	// // SerialDebug.print(heading); SerialDebug.print("\t");
-	// SerialDebug.print(ypr.yaw); SerialDebug.print("\t");
-	// SerialDebug.print(ypr.pitch); SerialDebug.print("\t");
-	// SerialDebug.println(ypr.roll);
 
 	return ypr.yaw;
 }

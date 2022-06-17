@@ -1,6 +1,7 @@
 // #include <kernel.h>
 #include "rp2040.h"
 #include "uart.h"
+#include <cstring>
 
 struct uart_hw {
 	uint32_t dr;
@@ -122,10 +123,7 @@ static void hex2str(char *str, int n) {
 }
 
 void uart_print(char *s) {
-	while (*s) {
-		uart_write(0, s, 1);
-		++s;
-	}
+	uart_write(0, s, strlen(s));
 }
 
 void uart_hex(uint32_t x) {
