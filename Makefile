@@ -1,6 +1,6 @@
 
 # export PATH="C:\Users\Michael\Documents\Personal\Programing\Embedded Development\OSAB\OSAB-RP2040-Kernel\tools\arm\bin":$PATH
-SHELL := cmd.exe
+SHELL := bash
 export SHELL
 
 include Config.mk
@@ -39,10 +39,24 @@ LD_FLAGS  := $(FLAGS_CPU) $(FLAGS_OPT) $(FLAGS_LSP) $(FLAGS_LD)
 AR_FLAGS  := rcs
 NM_FLAGS  := --numeric-sort --defined-only --demangle --print-size
 
+#******************************************************************************
+# Colors
+#******************************************************************************
+
+COL_CORE    := [38;2;187;206;251m
+COL_KERNEL  := [38;2;100;206;251m
+COL_LIB     := [38;2;206;244;253m
+COL_SRC     := [38;2;100;149;237m
+COL_LINK    := [38;2;255;255;202m
+COL_ERR     := [38;2;255;159;159m
+COL_OK      := [38;2;179;255;179m
+COL_RESET   := [0m
+
 
 #******************************************************************************
 # Folders and Files
 #******************************************************************************
+
 # USR_SRC         := $(BASE)/src
 # LIB_SRC         := $(BASE)/libs
 # KERNEL_SRC      := $(BASE)/kernel
@@ -75,18 +89,18 @@ TARGET_UF2      := $(BIN)/$(TARGET_NAME).uf2
 #******************************************************************************
 GCC_BASE = tools\arm\bin
 # GCC_BASE = C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin
-CC              := $(GCC_BASE)/arm-none-eabi-gcc
-CXX             := $(GCC_BASE)/arm-none-eabi-g++
-AR              := $(GCC_BASE)/arm-none-eabi-gcc-ar
-NM              := $(GCC_BASE)/arm-none-eabi-gcc-nm
-OBJDUMP         := $(GCC_BASE)/arm-none-eabi-objdump
-OBJCOPY         := $(GCC_BASE)/arm-none-eabi-objcopy
-# CC              := arm-none-eabi-gcc
-# CXX             := arm-none-eabi-g++
-# AR              := arm-none-eabi-gcc-ar
-# NM              := arm-none-eabi-gcc-nm
-# OBJDUMP         := arm-none-eabi-objdump
-# OBJCOPY         := arm-none-eabi-objcopy
+# CC              := $(GCC_BASE)/arm-none-eabi-gcc
+# CXX             := $(GCC_BASE)/arm-none-eabi-g++
+# AR              := $(GCC_BASE)/arm-none-eabi-gcc-ar
+# NM              := $(GCC_BASE)/arm-none-eabi-gcc-nm
+# OBJDUMP         := $(GCC_BASE)/arm-none-eabi-objdump
+# OBJCOPY         := $(GCC_BASE)/arm-none-eabi-objcopy
+CC              := arm-none-eabi-gcc
+CXX             := arm-none-eabi-g++
+AR              := arm-none-eabi-gcc-ar
+NM              := arm-none-eabi-gcc-nm
+OBJDUMP         := arm-none-eabi-objdump
+OBJCOPY         := arm-none-eabi-objcopy
 # CC              := cd $(BASE) && arm-none-eabi-gcc
 # CXX             := cd $(BASE) && arm-none-eabi-g++
 # AR              := cd $(BASE) && arm-none-eabi-gcc-ar
@@ -274,23 +288,23 @@ $(TARGET_ELF): $(USR_OBJ) $(LIB_OBJ) $(CORE_OBJ) $(KERNEL_OBJ)
 
 # Cleaning --------------------------------------------------------------------
 cleanUser:
-	@echo Cleaning user binaries...
-	@if exist $(USR_BIN) rd /s/q "$(USR_BIN)"
-	@if exist $(TARGET_LST) del $(subst /,\,$(TARGET_LST))
+	@echo "$(COL_LINK)"Cleaning user binaries..."$(COL_RESET)"
+	@if [ -f $(USR_BIN) ]; then rm "$(USR_BIN)"; fi
+	@if [ -f "$(TARGET_LST)" ]; then rm $(TARGET_LST); fi
 
 cleanCore:
-	@echo Cleaning core binaries...
-	@if exist $(CORE_BIN) rd /s/q "$(CORE_BIN)"
-	@if exist $(CORE_LIB) del  $(subst /,\,$(CORE_LIB))
+	@echo "$(COL_LINK)"Cleaning core binaries..."$(COL_RESET)"
+	@if [ -f $(CORE_BIN) ]; then rm "$(CORE_BIN)"; fi
+	@if [ -f $(CORE_LIB) ]; then rm  $(CORE_LIB); fi
 
 cleanKernel:
-	@echo Cleaning kernel binaries...
-	@if exist $(KERNEL_BIN) rd /s/q "$(KERNEL_BIN)"
-	@if exist $(KERNEL_LIB) del  $(subst /,\,$(KERNEL_LIB))
+	@echo "$(COL_LINK)"Cleaning kernel binaries..."$(COL_RESET)"
+	@if [ -f $(KERNEL_BIN) ]; then rm "$(KERNEL_BIN)"; fi
+	@if [ -f $(KERNEL_LIB) ]; then rm  $(KERNEL_LIB); fi
 
 cleanLib:
-	@echo Cleaning user library binaries...
-	@if exist $(LIB_BIN) rd /s/q "$(LIB_BIN)"
+	@echo "$(COL_LINK)"Cleaning user library binaries..."$(COL_RESET)"
+	@if [ -f $(LIB_BIN) ]; then rm "$(LIB_BIN)"; fi
 
 # compiler generated dependency info ------------------------------------------
 -include $(CORE_OBJ:.o=.d)

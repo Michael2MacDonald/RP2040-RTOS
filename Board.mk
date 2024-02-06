@@ -11,4 +11,4 @@ F_CPU := (120*1000000) # (120 MHz) This is the target core clock frequency. This
 # USB_DEFINES := -DUSB_VID=$(VID_USB) -DUSB_PID=$(PID_USB) -DUSB_BCD=$(BCD_USB)
 
 
-BOARD_DEFINES := -DF_CPU=$(F_CPU) #$(USB_DEFINES) #-D$(MCU_DEF) -D$(BOARD_DEF)
+BOARD_DEFINES := -DF_CPU="$(F_CPU)" #$(USB_DEFINES) #-D$(MCU_DEF) -D$(BOARD_DEF)
