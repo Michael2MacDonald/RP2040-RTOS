@@ -2,6 +2,7 @@
 !/.vscode/tasks.json
 
 /bin/**/*
+/build/**/*
 /other
 /dont-compile
 /kernel/wip/**/*

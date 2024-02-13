@@ -12,6 +12,8 @@
 
 #include <algorithm>
 #include <vector>
+#include <string>
+#include <cstring>
 
 // Extern "C" allows the variable to be visable by the 'PendSVHandler.S' assembly file
 extern "C" {
@@ -47,6 +49,19 @@ Scheduler* Sched; // Create Scheduler object
 
 
 // }
+
+
+int Scheduler::create(std::string name, int stackSize, int (*_func)(void), TPri_t priority = DEFAULT_THREAD_PRIORITY) {
+	if (name.length()>MAX_THREAD_NAME_LEN) { return -1; }
+	if (thread(name.c_str()) == nullptr) { // Check that name does not already exist
+		TCB_t* tmp = new TCB(name, priority, queued, *_func, stackSize);
+		if (tmp == nullptr) return -1;
+		threads.push_back(tmp);
+		return 0;
+	} else {
+		return -1;
+	}
+}
 
 
 void Scheduler::block() { // Block the current thread

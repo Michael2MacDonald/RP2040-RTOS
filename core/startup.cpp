@@ -1,9 +1,9 @@
 
-#include <core.h>
-#include <resets.h>
-#include <gpio.h>
-#include <uart.h>
-#include <clock.h>
+#include "core.h"
+#include "resets.h"
+#include "gpio.h"
+#include "uart.h"
+#include "clock.h"
 
 
 void gpio_setup() { // rename?? io_setup?? pads_setup??
