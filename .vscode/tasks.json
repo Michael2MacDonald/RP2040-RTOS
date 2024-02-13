@@ -1,41 +1,4 @@
 {
-  "tasks": [
-    {
-      "label": "Build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "command": "${workspaceFolder}/tools/make.exe",
-      "args": [
-        "all",
-        "-j",
-        "-Otarget",
-      ]
-    },
-    {
-      "label": "Clean",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "command": "${workspaceFolder}/tools/make.exe",
-      "args": [
-        "clean",
-        // "-d"
-      ]
-    },
-    {
-      "label": "Rebuild",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "dependsOrder": "sequence",
-      "dependsOn": ["Clean", "Build"]
-    }
-  ],
-  
   "version": "2.0.0",
   "type": "shell",
   "problemMatcher": "$gcc",
@@ -46,5 +9,55 @@
     "focus": false,
     "panel": "shared",
     "showReuseMessage": false
-  }
+  },
+  
+  "tasks": [
+    {
+      "label": "Make",
+      "type": "shell",
+      "command": "cmake --build build/ --config Debug --target RP2040-Blink-UART -- -j 4",
+      "options": {
+          "cwd": "${workspaceFolder}/"
+      },
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      }
+    },
+    {
+      "label": "CMake",
+      "type": "shell",
+      "command": "cmake ../ --fresh",
+      "options": {
+          "cwd": "${workspaceFolder}/build"
+      },
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      }
+    },
+    {
+      "label": "ELF2UF2",
+      "type": "shell",
+      "command": "../tools/elf2uf2 RP2040-Blink-UART RP2040-Blink-UART.uf2",
+      "options": {
+          "cwd": "${workspaceFolder}/bin"
+      },
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      }
+    },
+    {
+      "label": "Build",
+      "dependsOn": ["CMake", "Make", "ELF2UF2"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ],
+  
+
 }

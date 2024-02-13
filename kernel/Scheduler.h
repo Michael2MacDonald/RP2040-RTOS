@@ -195,15 +195,7 @@ public:
 
 	// void init(); // Initialize the scheduler
 
-	int create(std::string name, int stackSize, int (*_func)(void), TPri_t priority = DEFAULT_THREAD_PRIORITY) {
-		if (name.length()>MAX_THREAD_NAME_LEN) { return -1; }
-		if (thread(name.c_str()) == nullptr) { // Check that name does not already exist
-			threads.push_back(new TCB(name, priority, queued, *_func, stackSize));
-			return 0;
-		} else {
-			return -1;
-		}
-	}
+	int create(std::string name, int stackSize, int (*_func)(void), TPri_t priority);
 
 	// void purgeThreads(); // Remove expired threads
 	void updateThreads(); /** TODO: Remove?? Replace?? */ // Updates blocked threads if there condition/delay/wait is over

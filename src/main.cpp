@@ -96,7 +96,7 @@ extern "C" void loop() {
 	uart_print("Sensor Report:\n\r");
 	uart_print("	Temp: 30 C\n\r");
 	uart_print("	Humidity: 46%\n\r");
-	delay(10000);
+	Kernel::Sched->sleep(10000);
 }
 
 
@@ -109,8 +109,19 @@ extern "C" void HardFault_Handler() {
 	gpio_dir(13, GPIO_OUT); // Set pin as output
 	while(1){ // Blink LED forever
 		gpio_set(13, HIGH);
-		delay_nop(2000000);
+		delay_nop(1000000/2);
 		gpio_set(13, LOW);
-		delay_nop(2000000);
+		delay_nop(1000000/2);
 	}
 }
+
+
+
+
+// todo: put somewhere in kernel
+extern "C" void _close(void) {}
+extern "C" void _lseek(void) {}
+extern "C" void _read(void) {}
+extern "C" void _write(void) {}
+extern "C" void _getpid(void) {}
+extern "C" void _kill(void) {}

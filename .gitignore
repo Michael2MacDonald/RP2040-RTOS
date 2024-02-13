@@ -4,6 +4,7 @@
 /build/**/*
 
 /bin/**/*
+/build/**/*
 /other
 /dont-compile
 /kernel/wip/**/*
