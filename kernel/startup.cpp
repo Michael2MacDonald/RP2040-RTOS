@@ -14,7 +14,7 @@ extern "C" void SVC();
 extern "C" int main();
 extern "C" void enter_main();
 
-extern "C" Kernel::TCB* CurrentTCB;
+// extern "C" Kernel::TCB* Kernel::CurrentTCB;
 
 extern Kernel::Scheduler* Sched;
 extern "C" {
@@ -57,7 +57,7 @@ void _startup(void) {
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
 	Kernel::Sched->create("_MAIN", 256, &main, Kernel::none); // Create the main thread
-	CurrentTCB = Kernel::Sched->thread("_MAIN");
+	Kernel::CurrentTCB = Kernel::Sched->thread("_MAIN");
 	// CurrentTCB = Kernel::Sched->threads[0];
 
 
