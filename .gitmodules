@@ -1,0 +1,3 @@
+[submodule "tools/elf2uf2"]
+	path = tools/elf2uf2
+	url = https://github.com/rej696/elf2uf2
