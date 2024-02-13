@@ -39,7 +39,7 @@
     {
       "label": "ELF2UF2",
       "type": "shell",
-      "command": "../tools/elf2uf2 RP2040-Blink-UART RP2040-Blink-UART.uf2",
+      "command": "../tools/elf2uf2/elf2uf2 RP2040-Blink-UART RP2040-Blink-UART.uf2",
       "options": {
           "cwd": "${workspaceFolder}/bin"
       },
