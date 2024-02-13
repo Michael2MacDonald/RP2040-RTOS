@@ -90,7 +90,7 @@ void uart_putc(uint32_t id, char c) {
 	uart->dr = c;
 }
 
-uint32_t uart_write(uint32_t id, char *buff, uint32_t len) {
+uint32_t uart_write(uint32_t id, const char *buff, uint32_t len) {
 	uint32_t i;
 	// volatile struct uart_hw *uart;
 
@@ -122,7 +122,7 @@ static void hex2str(char *str, int n) {
 	str[8] = 0;
 }
 
-void uart_print(char *s) {
+void uart_print(const char *s) {
 	uart_write(0, s, strlen(s));
 }
 

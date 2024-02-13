@@ -196,6 +196,9 @@ public:
 	// void init(); // Initialize the scheduler
 
 	int create(std::string name, int stackSize, int (*_func)(void), TPri_t priority);
+	int create(const char* name, int stackSize, int (*_func)(void), TPri_t priority) {
+		return create(std::string(name), stackSize, _func, priority);
+	}
 
 	// void purgeThreads(); // Remove expired threads
 	void updateThreads(); /** TODO: Remove?? Replace?? */ // Updates blocked threads if there condition/delay/wait is over
