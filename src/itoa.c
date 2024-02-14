@@ -18,10 +18,6 @@
 
 #include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 char* ltoa( long value, char *string, int radix )
 {
   char tmp[33];
@@ -119,7 +115,3 @@ char* utoa( unsigned int value, char *string, int radix )
 {
   return ultoa( value, string, radix ) ;
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

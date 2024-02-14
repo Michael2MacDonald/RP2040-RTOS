@@ -16,21 +16,19 @@
  * I don't think I will make it round robin
  */
 
-#ifndef DEFAULT_THREAD_PRIORITY
+// #ifndef DEFAULT_THREAD_PRIORITY
 	#define DEFAULT_THREAD_PRIORITY normal // Default is used when a priority value is not given on task creation
-#endif
-#ifndef MAX_THREAD_NAME_LEN
+// #endif
+// #ifndef MAX_THREAD_NAME_LEN
 	#define MAX_THREAD_NAME_LEN 8 // 
-#endif
+// #endif
 
 
 #include "kernel.h"
+#include "list.h"
 
-#include <vector>
-#include <algorithm> // std::find
-// #include <stdint.h>
-#include <string>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 extern void PendSV_Trigger();
 
@@ -38,9 +36,6 @@ extern volatile uint32_t Ticks; // Tick counter
 extern volatile uint32_t Millis;
 
 
-class Scheduler;
-
-namespace Kernel {
 
 void return_handler();
 
@@ -68,24 +63,33 @@ typedef enum ThreadState {
 // typedef bool (*Condition_t)(void);
 // typedef std::function<bool(void)> Condition_t; // Rename Condition_t to Cond_t????
 
-union StateMgr {
-	struct {
-		uint32_t start; // Start time
-		uint32_t delay; // Delay in milliseconds
-		bool operator==(bool) { return (millis() - start) >= delay; }
-		operator bool() { return (millis() - start) >= delay; }
-	} sleep;
-	struct {
-		void* event;
-		bool operator==(bool) { return true; }
-		operator bool() { return true; }
-	} event;
-	struct {
-		void* resource;
-		bool operator==(bool) { return true; }
-		operator bool() { return true; }
-	} resource;
-}; /** END: union StateMgr */
+// typedef union StateMgr {
+// 	struct sleep {
+// 		uint32_t start; // Start time
+// 		uint32_t delay; // Delay in milliseconds
+// 		// bool operator==(bool) { return (millis() - start) >= delay; }
+// 		// operator bool() { return (millis() - start) >= delay; }
+// 	};
+// 	struct event {
+// 		void* event;
+// 		// bool operator==(bool) { return true; }
+// 		// operator bool() { return true; }
+// 	};
+// 	struct resource {
+// 		void* resource;
+// 		// bool operator==(bool) { return true; }
+// 		// operator bool() { return true; }
+// 	};
+// } TStateMgr_t; /** END: union StateMgr */
+
+typedef struct {
+	union {
+		uint32_t sleep_start;
+		void* event_ptr;
+		void* resource_ptr;
+	};
+	uint32_t sleep_delay;
+} TStateMgr_t;
 
 
 /** STACK: Task Initialization
@@ -127,40 +131,25 @@ typedef struct TCB { // Thread control block
 
 	// A higher priority thread will pause a lower priority thread and run first
 	// Lower priority value means a higher priority.
-	ThreadPriority priority;
+	TPri_t priority;
 
 	// template<int size> struct pri_test {
 	// 	int8_t pri : size, urg : 8-size;
 	// };
 
-	ThreadState state; // active, paused, blocked, queued
+	TState_t state; // active, paused, blocked, queued
 
 	/** TODO: replace?? improve?? */
-	StateMgr stateMgr; // Pointer to object used by blocked states to check if the state should be unblocked
+	TStateMgr_t* stateMgr; // Pointer to object used by blocked states to check if the state should be unblocked
 
-	std::string name; // User defined name for the thread. Used to get a handle to the thread.
+	const char* name; // User defined name for the thread. Used to get a handle to the thread.
 	// char name[MAX_THREAD_NAME_LEN]; // User defined name for the thread. Used to get a handle to the thread.
 
 	// TCB_Stack stack; // Stack with initialization values for the thread
 	void* stack; // Stack with initialization values for the thread
-
-	TCB(std::string _name, TPri_t _priority, TState_t _state, int (*_func)(void), uint32_t _stackSize) {
-		name = _name; // Set name
-		func = _func; // Set func
-		priority = _priority; // Set priority
-		state = _state; // Set state manager
-
-		if (_stackSize < 48) _stackSize = 48; // Ensure that the stack is at least 48 bytes to accommodate the compiler saving registers on function entry (I need to find a way to tell gcc not to save registers on function entry because the context switch does it for us)
-		stack = malloc(_stackSize + sizeof(stack_t)); // Allocate stack size plus space for the stack frame
-		if (stack == NULL) { /** TODO: Add error handling in case memory is not allocated */ }
-		stack_t* frame = (stack_t*)((uint32_t)stack + _stackSize); // Get the stack frame from the top of the stack
-
-		sp = (uint32_t)frame;         // Set SP to the start of the stack frame
-		frame->pc = (uint32_t)func;            // Set PC to the function address
-		frame->xPSR = 0x01000000;              // Set xPSR to 0x01000000 (the default value)
-		frame->lr = (uint32_t)&return_handler; // Set LR to a return handler function
-	}
 } TCB_t;
+
+TCB_t* create_TCB(const char* _name, TPri_t _priority, TState_t _state, int (*_func)(void), uint32_t _stackSize);
 
 // extern Scheduler* Sched;
 // typedef struct {
@@ -171,7 +160,7 @@ typedef struct TCB { // Thread control block
 // } Core_t;
 // extern Core_t Core;
 
-extern "C" volatile TCB* CurrentTCB; // Pointer to the current TCB
+extern volatile TCB_t* CurrentTCB; // Pointer to the current TCB
 
 /**
  * @class Scheduler
@@ -179,80 +168,46 @@ extern "C" volatile TCB* CurrentTCB; // Pointer to the current TCB
  * @brief
  * @warning Not Thread Safe! Should only be used by the kernel through PendSV_Handler and main()
  */
-class Scheduler {
-public:
-	/** TODO:
-	 * Place all global variables like CurrentTCB in a structure or array.
-	 * Place the address of the array in a dedicated register (r9)
-	 * Create 
-	 */
-	// static TCB* CurrentTCB; // Pointer to the current TCB
-	bool enabled = false; // if the scheduler is running
-	std::vector<TCB*> threads; // Holds pointers to all threads
 
-	Scheduler() {}
-	~Scheduler() {}
+// void init(); // Initialize the scheduler
 
-	// void init(); // Initialize the scheduler
+int thread_create(const char* name, int stackSize, int (*_func)(void), TPri_t priority);
 
-	int create(std::string name, int stackSize, int (*_func)(void), TPri_t priority);
-	int create(const char* name, int stackSize, int (*_func)(void), TPri_t priority) {
-		return create(std::string(name), stackSize, _func, priority);
-	}
+// void purgeThreads(); // Remove expired threads
+void kupdateThreads(); /** TODO: Remove?? Replace?? */ // Updates blocked threads if there condition/delay/wait is over
+TCB_t* ksetActiveThread(); // Returns the highest priority thread that is not blocked
 
-	// void purgeThreads(); // Remove expired threads
-	void updateThreads(); /** TODO: Remove?? Replace?? */ // Updates blocked threads if there condition/delay/wait is over
-	TCB* setActiveThread(); // Returns the highest priority thread that is not blocked
-	
-	/** TODO: Remove?? Replace?? */
-	void onReturn() { // (Rename???) Called when active thread returns
-		threads.erase( std::find(threads.begin(),threads.end(),CurrentTCB) ); // Finds and removes the activeThread from the threads vector
-		// CurrentTCB = (TCB*)nullptr; // Clear activeThread pointer
-		CurrentTCB = main(); // Clear activeThread pointer (set to _MAIN thread)
-		/** TODO: 
-		 * When a thread is removed from running (ends??), check that the stack pointer is within the valid range
-		 * (on context switch, check for stack overflow)
-		 */
-		PendSV_Trigger(); // Call PendSV to run the next thread
-	}
+/** TODO: Remove?? Replace?? */
+void konReturn();
 
-	// Find the thread with the given name and return its pointer
-	// TCB* thread(const char name[MAX_THREAD_NAME_LEN]) {
-	// 	for (uint16_t i = 0; i < threads.size(); i++)
-	// 		if (threads[i]->name == name) return threads[i];
-	// 	return nullptr;
-	// }
-	TCB* thread(const char *name) {
-		if (strlen(name) > MAX_THREAD_NAME_LEN) return nullptr;
-		for (uint16_t i = 0; i < threads.size(); i++)
-			if (threads[i]->name == name) return threads[i];
-		return nullptr;
-	}
-	// Return a pointer to the currently running thread
-	TCB* self() { return (TCB*)CurrentTCB; }
-	// Return a pointer to the main thread
-	TCB* main() { return (TCB*)threads[0]; }
+// Find the thread with the given name and return its pointer
+// TCB* thread(const char name[MAX_THREAD_NAME_LEN]) {
+// 	for (uint16_t i = 0; i < threads.size(); i++)
+// 		if (threads[i]->name == name) return threads[i];
+// 	return nullptr;
+// }
+TCB_t* find_thread(const char *name);
+// Return a pointer to the currently running thread
+TCB_t* thread_self();
+// Return a pointer to the main thread
+TCB_t* thread_main();
 
 
-	void block();                // Set the current thread's state to blocked and call PendSV
-	void block(TCB* thread);     // Set the given thread's state to blocked
-	void unblock(TCB* thread);   // Set the given thread's state to paused
-	void sleep(uint32_t millis); // Sleep the current thread for _ms milliseconds
-	// void wait(Resource_t);       // Wait for a resource to be available (Rename Resource_t to Res_t or Rsrc_t)
-	// Wait for a condition to be true (The Contition type is a lambda function that returns the value of the user condition)
-	// void wait(Condition_t);
-	
-	/** halt()
-	 * @short Immediately invoke a context switch.
-	 * This can be used to force the status of blocked/sleeping/waiting threads to be updated.
-	 * If a thread is unblocked and has a higher priority than the current thread, it will be
-	 * run. Otherwise the current thread will be resumed.
-	 */
-	void halt() { PendSV_Trigger(); } // Needed???? rename yield()???
+void thread_block_self();                // Set the current thread's state to blocked and call PendSV
+void thread_block(TCB_t* thread);     // Set the given thread's state to blocked
+void thread_unblock(TCB_t* thread);   // Set the given thread's state to paused
+void thread_sleep(uint32_t millis); // Sleep the current thread for _ms milliseconds
+// void wait(Resource_t);       // Wait for a resource to be available (Rename Resource_t to Res_t or Rsrc_t)
+// Wait for a condition to be true (The Contition type is a lambda function that returns the value of the user condition)
+// void wait(Condition_t);
 
-}; /** END: Class Scheduler */
-
-}; /** END: namespace Kernel */
+/** halt()
+ * @short Immediately invoke a context switch.
+ * This can be used to force the status of blocked/sleeping/waiting threads to be updated.
+ * If a thread is unblocked and has a higher priority than the current thread, it will be
+ * run. Otherwise the current thread will be resumed.
+ */
+void thread_halt(); // Needed???? rename yield()???
 
 
 #endif /** END: __KERNEL_SCHEDULER_H */

@@ -41,7 +41,7 @@ set(BOARD_DEFINES "-DF_CPU=\"${F_CPU}\"") #$(USB_DEFINES) #-D$(MCU_DEF) -D$(BOAR
 set(CFG_DEFINES "")
 set(DEFINES "${CFG_DEFINES} ${BOARD_DEFINES} -DLOW_REGS_ONLY=1")
 
-set(LIBS "-lm -lstdc++")
+# set(LIBS "-lm -lstdc++")
 
 set(FLAGS_CPU "-mthumb -mcpu=cortex-m0plus -mabi=aapcs") #-mfloat-abi=hard -mfpu=fpv5-d16
 set(FLAGS_OPT "-O${OPT}")
@@ -56,11 +56,14 @@ set(FLAGS_LD "-T${LINKER} -Wl,--print-memory-usage,--gc-sections --specs=nano.sp
 set(CPP_FLAGS "${FLAGS_CPU} ${FLAGS_OPT} ${FLAGS_COM} ${DEFINES} ${FLAGS_CPP}")
 set(C_FLAGS   "${FLAGS_CPU} ${FLAGS_OPT} ${FLAGS_COM} ${DEFINES} ${FLAGS_C}")
 set(S_FLAGS   "${FLAGS_CPU} ${FLAGS_OPT} ${FLAGS_COM} ${DEFINES} ${FLAGS_S}")
-set(LD_FLAGS  "${FLAGS_CPU} ${FLAGS_OPT} ${FLAGS_LSP} ${FLAGS_LD} ${LIBS}")
+set(LD_FLAGS  "${FLAGS_CPU} ${FLAGS_OPT} ${FLAGS_LSP} ${FLAGS_LD}")
 set(AR_FLAGS  "rcs")
 set(NM_FLAGS  "--numeric-sort --defined-only --demangle --print-size")
 
 set(CMAKE_EXE_LINKER_FLAGS "${LD_FLAGS}" CACHE INTERNAL "")
+
+set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
+
 
 set(CMAKE_C_FLAGS "${C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CPP_FLAGS}")
@@ -69,29 +72,32 @@ set(CMAKE_ASM_FLAGS "${S_FLAGS}")
 
 add_executable(${PROJECT_NAME}
 	core/boot2_w25x10cl_4_padded_checksum.S
-	core/resets.cpp
-	core/clock.cpp
-	core/gpio.cpp
-	core/uart.cpp
-	core/startup.cpp
+	core/resets.c
+	core/clock.c
+	core/gpio.c
+	core/uart.c
+	core/startup.c
 
 	kernel/vectors.S
 	kernel/enter_main.S
 	kernel/PendSVHandler.S
 	kernel/reset.S
-	kernel/cortex.cpp
-	kernel/startup.cpp
-	kernel/delay.cpp
-	kernel/Scheduler.cpp
-	kernel/Kernel.cpp
+	kernel/list.c
+	kernel/cortex.c
+	kernel/startup.c
+	kernel/delay.c
+	kernel/Scheduler.c
+	kernel/Kernel.c
 
 	src/itoa.c
 	src/compass.c
-	src/print/Print.cpp
+	# src/print/Print.cpp
 
-	src/main.cpp
+	src/main.c
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC kernel core src src/print)
+# target_link_libraries(${PROJECT_NAME} m stdc++)
+target_link_libraries(${PROJECT_NAME} m)
 
 

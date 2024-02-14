@@ -15,10 +15,6 @@
 
 #include "cm0plus.h"
 
-#ifndef __cplusplus
-// #include "capi.h" // Include C API/wrapper for kernal classes and namespaces
-#endif
-
 /** TODO:
  * Look into using these GCC compiler options:
  * -fstack-limit-register=reg
@@ -60,8 +56,8 @@
 // #endif
 
 
-extern "C" void init();
-extern "C" void loop();
+extern void init();
+extern void loop();
 
 
 
@@ -134,9 +130,9 @@ extern "C" void loop();
 // ...
 
 // === C Types ===
-#ifndef __cplusplus
+
 #include <stdbool.h>
-#endif
+
 
 /**===========================================================================
  * Clock, Timing, and Delay
@@ -234,15 +230,9 @@ extern int32_t get_current_exception(); // Get the current exception number
 
 // register uint32_t CurrentTCB_r;
 
-#ifdef __cplusplus
 #include "Scheduler.h"
 
 
-namespace Kernel {
-	extern Scheduler* Sched; // created in Scheduler.h
-}
-
-#endif /** END: __cplusplus */
 
 // === Scheduler Types ===
 // namespace Kernel {

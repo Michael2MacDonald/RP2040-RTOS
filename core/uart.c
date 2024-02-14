@@ -1,7 +1,7 @@
 // #include <kernel.h>
 #include "rp2040.h"
 #include "uart.h"
-#include <cstring>
+// #include <cstring>
 
 struct uart_hw {
 	uint32_t dr;

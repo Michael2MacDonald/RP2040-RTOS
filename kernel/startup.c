@@ -6,20 +6,17 @@
 
 #include "Scheduler.h"
 
-#include <vector>
-#include <string>
-#include <cstring>
+// #include <vector>
+// #include <string>
+// #include <cstring>
 
-extern "C" void SVC();
-extern "C" int main();
-extern "C" void enter_main();
+extern uint32_t SVC();
+extern int main();
+extern void enter_main();
 
 // extern "C" Kernel::TCB* Kernel::CurrentTCB;
 
-extern Kernel::Scheduler* Sched;
-extern "C" {
-	bool* enabled;
-}
+extern bool sched_enabled;
 
 // extern void __libc_init_array();
 
@@ -31,7 +28,7 @@ extern "C" {
 // }
 
 // extern "C" __attribute__((noreturn, section(".startup"), optimize("no-tree-loop-distribute-patterns")))
-extern "C" __attribute__((noreturn, section(".startup")))
+__attribute__((noreturn, section(".startup")))
 void _startup(void) {
 
 	core_startup(); // Initialize the MCU dependent peripherals
@@ -52,12 +49,12 @@ void _startup(void) {
 	systick_init(); // Initialize the systick timer
 	systick_set(120000);
 
-	Kernel::Sched = new Kernel::Scheduler();
-	enabled = &(Kernel::Sched->enabled);
+	// Kernel::Sched = new Kernel::Scheduler();
+	// enabled = &(Kernel::Sched->enabled);
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
-	Kernel::Sched->create("_MAIN", 256, &main, Kernel::none); // Create the main thread
-	Kernel::CurrentTCB = Kernel::Sched->thread("_MAIN");
+	thread_create("_MAIN", 256, &main, none); // Create the main thread
+	CurrentTCB = find_thread("_MAIN");
 	// CurrentTCB = Kernel::Sched->threads[0];
 
 
@@ -73,6 +70,7 @@ void _startup(void) {
 
 	asm("dsb"); // Data synchronization barrier
 	asm("isb"); // Instruction synchronization barrier
+
 
 	enter_main(); // Enter the _MAIN thread
 	while (1) asm volatile("WFI"); // DON'T RETURN!!!!
