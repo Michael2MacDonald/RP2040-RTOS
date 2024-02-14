@@ -3,10 +3,6 @@
 
 #include "cm0plus.h"
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 
 /**===========================================================================
  * ARM Cortex-M Peripheral Functions
@@ -88,9 +84,5 @@ void nvic_setpriority(IRQn_t IRQn, uint32_t priority);
 uint32_t SVC_(uint32_t svc_num, uint32_t *args);
 uint32_t SVC(uint32_t svc_num);
 
-
-// #ifdef __cplusplus
-// }; /** END: extern "C" */
-// #endif
 
 #endif /** END: __CORTEX_H */

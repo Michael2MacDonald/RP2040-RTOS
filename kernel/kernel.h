@@ -10,9 +10,6 @@
  * @todo Make this file compatible with C
  */
 
-
-#include <stdint.h>
-
 #include "cm0plus.h"
 
 /** TODO:
@@ -51,9 +48,6 @@
 // #define F_RTC          (F_REF / 256)
 // #define F_TICK         1000000
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
 
 
 extern void init();
@@ -68,63 +62,10 @@ extern void loop();
 // Copy code to RAM to run faster
 #define FASTRUN __attribute__ ((section(".text.fastcode")))
 
-// #ifndef _SYS__STDINT_H
-// // === Unsigned Types ===
-// typedef unsigned long long uint64_t;
-// typedef unsigned int uint32_t;
-// typedef unsigned short uint16_t;
-// typedef unsigned char uint8_t;
-// // === Signed Types ===
-// typedef long long int64_t;
-// typedef int int32_t;
-// typedef short int16_t;
-// typedef char int8_t;
-// #endif
 
-// #ifdef ___int8_t_defined
-// #ifndef _INT8_T_DECLARED
-// typedef char int8_t ;
-// #define _INT8_T_DECLARED
-// #endif
-// #ifndef _UINT8_T_DECLARED
-// typedef unsigned char uint8_t ;
-// #define _UINT8_T_DECLARED
-// #endif
-// #define __int8_t_defined 1
-// #endif /* ___int8_t_defined */
-// #ifdef ___int16_t_defined
-// #ifndef _INT16_T_DECLARED
-// typedef short int16_t ;
-// #define _INT16_T_DECLARED
-// #endif
-// #ifndef _UINT16_T_DECLARED
-// typedef unsigned short uint16_t ;
-// #define _UINT16_T_DECLARED
-// #endif
-// #define __int16_t_defined 1
-// #endif /* ___int16_t_defined */
-// #ifdef ___int32_t_defined
-// #ifndef _INT32_T_DECLARED
-// typedef int int32_t ;
-// #define _INT32_T_DECLARED
-// #endif
-// #ifndef _UINT32_T_DECLARED
-// typedef unsigned int uint32_t ;
-// #define _UINT32_T_DECLARED
-// #endif
-// #define __int32_t_defined 1
-// #endif /* ___int32_t_defined */
-// #ifdef ___int64_t_defined
-// #ifndef _INT64_T_DECLARED
-// typedef long long int64_t ;
-// #define _INT64_T_DECLARED
-// #endif
-// #ifndef _UINT64_T_DECLARED
-// typedef unsigned long long uint64_t ;
-// #define _UINT64_T_DECLARED
-// #endif
-// #define __int64_t_defined 1
-// #endif /* ___int64_t_defined */
+// __attribute__ ((section(".text.code")))
+#define PROGMEM __attribute__ ((section(".text.progmem")))
+#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
 
 // === Other Types ===
 // ...
@@ -132,6 +73,7 @@ extern void loop();
 // === C Types ===
 
 #include <stdbool.h>
+#include <stdint.h>
 
 
 /**===========================================================================
@@ -219,58 +161,12 @@ extern int32_t get_current_exception(); // Get the current exception number
 // extern uint64_t Call_SVC(...);
 
 
-// #ifdef __cplusplus
-// }; /** END: __cplusplus */
-// #endif
-
 
 /**===========================================================================
  * Kernel Functions And Classes
  * ===========================================================================*/
 
-// register uint32_t CurrentTCB_r;
-
 #include "Scheduler.h"
-
-
-
-// === Scheduler Types ===
-// namespace Kernel {
-// 	// Priority levels for tasks
-// 	enum ThreadPriority;
-// 	typedef enum ThreadPriority TPri_t;
-
-// 	// Urgency levels for tasks (used when running two tasks of the same priority)
-// 	enum ThreadUrgency;
-// 	typedef enum ThreadUrgency TUrg_t;
-
-// 	// Thread states (Active, Pending, Blocked, Etc)
-// 	enum ThreadState;
-// 	typedef enum ThreadState TState_t;
-
-// 	// Thread control block
-// 	struct TCB;
-// } /** END: namespace Kernel */
-
-// namespace Kernel {
-// 	class Scheduler; // 
-// 	class Component; // 
-
-// 	// Allows the user to hook into the init function and run code before the scheduler starts
-// 	int Init_Hook() __attribute__((weak));
-// 	// This thread is run when no other threads are running. It can be useful for entering a low power mode.
-// 	int Idle_Thread();
-
-// 	void PendSV_Trigger(); // Trigger PendSV interrupt (Rename?? PendSV, Call_PendSV, PendSV_Call)
-
-// 	// Rename to make user and system functions harder to confuse
-// 	void init();
-// 	// void idle(); // Rename Run()? IdleLoop()? Idle()? IdleHook()?
-// 	int Init_ISRHandler();
-
-// }; /** END: namespace Kernel */
-
-// extern "C" void volatile PendSV_Handler();
 
 
 

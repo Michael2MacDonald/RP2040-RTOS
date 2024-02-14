@@ -4,7 +4,6 @@
 #include <gpio.h> // For GPIO
 #include <uart.h> // For UART/Serial
 
-#define LED 13        // Onboard LED
 #define STROBE 13     // (Onboard LED) Vessel Strobe LED
 #define NAVLIGHTS 14  // Vessel side lights, masthead light, and stern light
 #define UART0 0       // UART0
@@ -13,13 +12,13 @@
 extern char * itoa(int, char*, int);
 
 
-// extern "C" void blink_led() {
-// 	gpio_set(LED, HIGH); delay(1000);
-// 	gpio_set(LED, LOW); delay(1000);
+// void blink_led() {
+// 	gpio_set(13, HIGH); delay(1000);
+// 	gpio_set(13, LOW); delay(1000);
 // }
-// extern "C" int blink_led_loop() {
+// int blink_led_loop() {
 // 	while(1) {
-// 		gpio_set(LED, !gpio_out_get(LED));
+// 		gpio_set(13, !gpio_out_get(13));
 // 		delay(1000);
 // 	}
 // }
@@ -105,19 +104,8 @@ void HardFault_Handler() {
 	gpio_dir(13, GPIO_OUT); // Set pin as output
 	while(1){ // Blink LED forever
 		gpio_set(13, HIGH);
-		delay_nop(1000000/2);
+		delay_nop(1000000);
 		gpio_set(13, LOW);
-		delay_nop(1000000/2);
+		delay_nop(1000000);
 	}
 }
-
-
-
-
-// todo: put somewhere in kernel
-void _close(void) {}
-void _lseek(void) {}
-void _read(void) {}
-void _write(void) {}
-void _getpid(void) {}
-void _kill(void) {}

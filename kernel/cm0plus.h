@@ -4,6 +4,7 @@
 /** TODO: Rename to cortex_hw.h ??? */
 
 #include "kernel.h"
+#include <stdint.h>
 
 
 // ========== Cortex-M0+ internal peripherals ==========

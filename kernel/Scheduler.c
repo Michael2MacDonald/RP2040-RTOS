@@ -7,30 +7,15 @@
 
 #include "kernel.h"
 #include "Scheduler.h"
-
 #include "cortex.h" // PendSV_Trigger()
 
 #include "list.h"
 
-// #include <algorithm>
-// #include <vector>
-// #include <string>
-// #include <cstring>
-
-// Extern "C" allows the variable to be visable by the 'PendSVHandler.S' assembly file
 volatile TCB_t* CurrentTCB; // Pointer to the current TCB
-
-// Declare outside of class
-// std::vector<TCB*> Scheduler::threads; // Holds pointers to all threads
-// TCB* Scheduler::activeThread;
-// bool Scheduler::enabled;
-// unsigned int Scheduler::lastId;
 
 
 // void Scheduler::init() { // Initialize the scheduler
-
 // 	// asm volatile("cpsid i"); // Disable interrupts (set PRIMASK)
-
 // 	asm volatile(
 // 		"cpsid i \n"      // Disable interrupts (set PRIMASK)
 // 		"ldr r4, =%0 \n"   // Get address of the current TCB
@@ -42,8 +27,6 @@ volatile TCB_t* CurrentTCB; // Pointer to the current TCB
 // 		:: "r"(this->activeThread)
 // 		: "r4", "memory"
 // 	);
-
-
 // }
 
 /** TODO:
@@ -56,10 +39,14 @@ bool sched_enabled = false; // if the scheduler is running
 list_t* threads;
 
 
+void return_handler() { // Rename???
+	konReturn();
+}
+
 TCB_t* create_TCB(const char* _name, TPri_t _priority, TState_t _state, int (*_func)(void), uint32_t _stackSize) {
 	TCB_t* tcb = (TCB_t*)malloc(sizeof(TCB_t));
 	if (tcb == NULL) { /** TODO: Add error handling in case memory is not allocated */ }
-	
+
 	tcb->name = _name; // Set name
 	tcb->func = _func; // Set func
 	tcb->priority = _priority; // Set priority
@@ -82,7 +69,12 @@ TCB_t* create_TCB(const char* _name, TPri_t _priority, TState_t _state, int (*_f
 }
 
 void konReturn() { // (Rename???) Called when active thread returns
-	// TODO: Make sure main thread is not deleted
+	// Make sure main thread is not deleted - Return to main thread if it exits
+	if (CurrentTCB == thread_main()) {
+		PendSV_Trigger(); // Call PendSV to run the next thread
+		// TODO: Shit, I forgot if I should make an infinite loop and wait for PendSV_Trigger() or return this function...
+		return;
+	}
 
 	list_t* list_item = NULL;
 	for (unsigned int i = list_size(threads); i>0; i--) {
@@ -186,9 +178,7 @@ void thread_sleep(uint32_t msec) { // Unblock a thread
 void thread_halt() { PendSV_Trigger(); } // Needed???? rename yield()???
 
 
-void return_handler() { // Rename???
-	konReturn();
-}
+
 
 // Returns the highest priority thread that is not blocked
 TCB_t* ksetActiveThread() { // No threads can be active when this is called!

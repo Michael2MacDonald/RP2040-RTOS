@@ -5,8 +5,6 @@
  * @file Scheduler.h
  * @author Michael MacDonald <michael2macdonald@gmail.com>
  * @short 
- * 
- * TODO: Move definitions to cpp file??
  */
 
 /** TODO:
@@ -16,12 +14,12 @@
  * I don't think I will make it round robin
  */
 
-// #ifndef DEFAULT_THREAD_PRIORITY
-	#define DEFAULT_THREAD_PRIORITY normal // Default is used when a priority value is not given on task creation
-// #endif
-// #ifndef MAX_THREAD_NAME_LEN
-	#define MAX_THREAD_NAME_LEN 8 // 
-// #endif
+#ifndef DEFAULT_THREAD_PRIORITY
+	#define DEFAULT_THREAD_PRIORITY normal /** Default is used when a priority value is not given on task creation */
+#endif
+#ifndef MAX_THREAD_NAME_LEN
+	#define MAX_THREAD_NAME_LEN 12 /**  */
+#endif
 
 
 #include "kernel.h"
@@ -35,9 +33,6 @@ extern void PendSV_Trigger();
 extern volatile uint32_t Ticks; // Tick counter
 extern volatile uint32_t Millis;
 
-
-
-void return_handler();
 
 typedef enum ThreadPriority { // Priority levels for tasks
 	uninterruptible = -1,
@@ -60,27 +55,6 @@ typedef enum ThreadState {
 	blocked   // Blocked by a user program or thread and can only be unblocked manually by a user program or thread
 } TState_t;
 
-// typedef bool (*Condition_t)(void);
-// typedef std::function<bool(void)> Condition_t; // Rename Condition_t to Cond_t????
-
-// typedef union StateMgr {
-// 	struct sleep {
-// 		uint32_t start; // Start time
-// 		uint32_t delay; // Delay in milliseconds
-// 		// bool operator==(bool) { return (millis() - start) >= delay; }
-// 		// operator bool() { return (millis() - start) >= delay; }
-// 	};
-// 	struct event {
-// 		void* event;
-// 		// bool operator==(bool) { return true; }
-// 		// operator bool() { return true; }
-// 	};
-// 	struct resource {
-// 		void* resource;
-// 		// bool operator==(bool) { return true; }
-// 		// operator bool() { return true; }
-// 	};
-// } TStateMgr_t; /** END: union StateMgr */
 
 typedef struct {
 	union {
@@ -133,43 +107,20 @@ typedef struct TCB { // Thread control block
 	// Lower priority value means a higher priority.
 	TPri_t priority;
 
-	// template<int size> struct pri_test {
-	// 	int8_t pri : size, urg : 8-size;
-	// };
-
 	TState_t state; // active, paused, blocked, queued
 
 	/** TODO: replace?? improve?? */
 	TStateMgr_t* stateMgr; // Pointer to object used by blocked states to check if the state should be unblocked
 
 	const char* name; // User defined name for the thread. Used to get a handle to the thread.
-	// char name[MAX_THREAD_NAME_LEN]; // User defined name for the thread. Used to get a handle to the thread.
 
-	// TCB_Stack stack; // Stack with initialization values for the thread
 	void* stack; // Stack with initialization values for the thread
 } TCB_t;
 
 TCB_t* create_TCB(const char* _name, TPri_t _priority, TState_t _state, int (*_func)(void), uint32_t _stackSize);
 
-// extern Scheduler* Sched;
-// typedef struct {
-// 	Scheduler* operator->() {
-// 		/** TODO: Return the scheduler for the current core */
-// 		return Sched;
-// 	}
-// } Core_t;
-// extern Core_t Core;
-
 extern volatile TCB_t* CurrentTCB; // Pointer to the current TCB
 
-/**
- * @class Scheduler
- * @short Class that creates, deletes, and manages threads and tasks
- * @brief
- * @warning Not Thread Safe! Should only be used by the kernel through PendSV_Handler and main()
- */
-
-// void init(); // Initialize the scheduler
 
 int thread_create(const char* name, int stackSize, int (*_func)(void), TPri_t priority);
 
@@ -180,12 +131,7 @@ TCB_t* ksetActiveThread(); // Returns the highest priority thread that is not bl
 /** TODO: Remove?? Replace?? */
 void konReturn();
 
-// Find the thread with the given name and return its pointer
-// TCB* thread(const char name[MAX_THREAD_NAME_LEN]) {
-// 	for (uint16_t i = 0; i < threads.size(); i++)
-// 		if (threads[i]->name == name) return threads[i];
-// 	return nullptr;
-// }
+
 TCB_t* find_thread(const char *name);
 // Return a pointer to the currently running thread
 TCB_t* thread_self();

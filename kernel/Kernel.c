@@ -10,7 +10,6 @@
 #include "cm0plus.h"   // Include Cortex-M0+ header file
 #include "cortex.h"    // Include Cortex-M0+ header file
 #include "Scheduler.h" // Include scheduler header file
-// #include "Components/Components.h" // Include components
 
 uint64_t F_CPU_CURRENT; // This is the clock frequency that the device is currently configured for. It must be set by the application code whenever the clock frequency changes.
 
@@ -29,7 +28,7 @@ int main() { // Main
 
 
 /**===========================================================================
- * System Interupts
+ * System Interrupts
  * ===========================================================================*/
 
 __attribute__((used, weak))
@@ -64,11 +63,17 @@ void SysTick_Handler() { // Runs every 1ms as defined in startup.c
 	systick_hook(); // Call the user defined systick hook
 }
 
-// extern "C" __attribute__((used, weak))
+// extern __attribute__((used, weak))
 // void PendSV_Handler(); // DO NOT DEFINE!!! Defined in assembly file
 
 
-
+// Make the linker shut up (put in their own file?)
+void _close(void) {}
+void _lseek(void) {}
+void _read(void) {}
+void _write(void) {}
+void _getpid(void) {}
+void _kill(void) {}
 
 
 

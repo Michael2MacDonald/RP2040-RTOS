@@ -6,16 +6,11 @@
 
 #include "Scheduler.h"
 
-// #include <vector>
-// #include <string>
-// #include <cstring>
-
 extern uint32_t SVC();
 extern int main();
 extern void enter_main();
 
-// extern "C" Kernel::TCB* Kernel::CurrentTCB;
-
+// extern TCB_t* CurrentTCB;
 extern bool sched_enabled;
 
 // extern void __libc_init_array();
@@ -49,21 +44,10 @@ void _startup(void) {
 	systick_init(); // Initialize the systick timer
 	systick_set(120000);
 
-	// Kernel::Sched = new Kernel::Scheduler();
-	// enabled = &(Kernel::Sched->enabled);
 
 	// Kernel::Scheduler::init(); // Initialize the scheduler
 	thread_create("_MAIN", 256, &main, none); // Create the main thread
 	CurrentTCB = find_thread("_MAIN");
-	// CurrentTCB = Kernel::Sched->threads[0];
-
-
-	// while(CurrentTCB == nullptr){asm volatile("nop");}
-	// while(Kernel::Sched->thread("_MAIN")->func == &main){asm volatile("nop");}
-	// while(Kernel::Sched->thread("_MAIN") == nullptr){asm volatile("nop");}
-	// while(Kernel::Sched->threads[0] == nullptr){asm volatile("nop");}
-	// while(Kernel::Sched->threads[0]->name == "_MAIN"){asm volatile("nop");}
-	// main();
 
 	/* Run constructors / initializers */
 	// __libc_init_array();

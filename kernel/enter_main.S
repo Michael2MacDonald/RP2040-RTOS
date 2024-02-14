@@ -8,7 +8,6 @@
 .align 2
 
 
-/** TODO: Rename this file and function to enter_threads??? */
 /** 
  * @brief Switches to PSP, sets the stack pointer to _MAIN's stack pointer, and jumps to main()
  */
