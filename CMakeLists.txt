@@ -79,8 +79,10 @@ add_executable(${PROJECT_NAME}
 	core/startup.c
 
 	kernel/vectors.S
+	kernel/vectors_core1.S
 	kernel/enter_main.S
 	kernel/PendSVHandler.S
+	kernel/core1.c
 	kernel/reset.S
 	kernel/list.c
 	kernel/cortex.c

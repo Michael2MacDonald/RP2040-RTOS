@@ -15,7 +15,8 @@ SECTIONS {
 		KEEP(*(.boot2))    /* Second boot stage. Required by rp2040 to configure flash and ensure a bootable image using crc */
 		_eboot2 = .;
 		_svectors = .;
-		KEEP(*(.vectors))  /* Reset vector table for arm exceptions and interupts */
+		KEEP(*(.vectors))  /* Reset vector table for arm exceptions and interupts (Core 0) */
+		KEEP(*(.vectors1))  /* Reset vector table for arm exceptions and interupts (Core 1) */
 
 		_ssyslut = .;     /* OS system look up table?? Rename??? */
 		KEEP(*(.syslut))  /* Holds pointers to global variables and objects for OS operation (Including scheduler objects and configuration variables) */
@@ -133,5 +134,8 @@ _eheap = ADDR(.heap) + SIZEOF(.heap);
 _strap = ADDR(.trap);
 _etrap = ADDR(.trap) + SIZEOF(.trap);
 
-_estack = _etrap;
+_estack = ORIGIN(RAM) + LENGTH(RAM) - 28k;
 _stack = ORIGIN(RAM) + LENGTH(RAM);
+
+_estack_core1 = _etrap;
+_stack_core1 = ORIGIN(RAM) + LENGTH(RAM) - 28k;

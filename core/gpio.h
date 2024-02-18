@@ -15,8 +15,8 @@
 #define GPIO_FUNC_CLK			8
 #define GPIO_FUNC_USB			9
 
-#define GPIO_OUT 1
-#define GPIO_IN  0
+#define GPIO_OUTPUT 1
+#define GPIO_INPUT  0
 #define OUTPUT   1
 #define INPUT    0
 

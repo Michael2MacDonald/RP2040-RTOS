@@ -298,9 +298,110 @@ struct xosc_hw {
 
 
 
-// #ifdef __cplusplus
-// }; /** END: __cplusplus */
-// #endif
+
+struct sio_hw {
+	uint32_t CPUID;              // (0x000) Processor core identifier
+	uint32_t GPIO_IN;            // (0x004) Input value for GPIO pins
+	uint32_t GPIO_HI_IN;         // (0x008) Input value for QSPI pins
+	uint32_t RESERVED0;          // (0x00c) Reserved
+	uint32_t GPIO_OUT;           // (0x010) GPIO output value
+	uint32_t GPIO_OUT_SET;       // (0x014) GPIO output value set
+	uint32_t GPIO_OUT_CLR;       // (0x018) GPIO output value clear
+	uint32_t GPIO_OUT_XOR;       // (0x01c) GPIO output value XOR
+	uint32_t GPIO_OE;            // (0x020) GPIO output enable
+	uint32_t GPIO_OE_SET;        // (0x024) GPIO output enable set
+	uint32_t GPIO_OE_CLR;        // (0x028) GPIO output enable clear
+	uint32_t GPIO_OE_XOR;        // (0x02c) GPIO output enable XOR
+	uint32_t GPIO_HI_OUT;        // (0x030) QSPI output value
+	uint32_t GPIO_HI_OUT_SET;    // (0x034)  QSPI output value set
+	uint32_t GPIO_HI_OUT_CLR;    // (0x038)  QSPI output value clear
+	uint32_t GPIO_HI_OUT_XOR;    // (0x03c)  QSPI output value XOR
+	uint32_t GPIO_HI_OE;         // (0x040)  QSPI output enable
+	uint32_t GPIO_HI_OE_SET;     // (0x044)  QSPI output enable set
+	uint32_t GPIO_HI_OE_CLR;     // (0x048)  QSPI output enable clear
+	uint32_t GPIO_HI_OE_XOR;     // (0x04c)  QSPI output enable XOR
+	uint32_t FIFO_ST;            // (0x050)  Status register for inter-core FIFOs (mailboxes).
+	uint32_t FIFO_WR;            // (0x054)  Write access to this core’s TX FIFO
+	uint32_t FIFO_RD;            // (0x058)  Read access to this core’s RX FIFO
+	uint32_t SPINLOCK_ST;        // (0x05c)  Spinlock state
+	uint32_t DIV_UDIVIDEND;      // (0x060)  Divider unsigned dividend
+	uint32_t DIV_UDIVISOR;       // (0x064)  Divider unsigned divisor
+	uint32_t DIV_SDIVIDEND;      // (0x068)  Divider signed dividend
+	uint32_t DIV_SDIVISOR;       // (0x06c)  Divider signed divisor
+	uint32_t DIV_QUOTIENT;       // (0x070)  Divider result quotient
+	uint32_t DIV_REMAINDER;      // (0x074)  Divider result remainder
+	uint32_t DIV_CSR;            // (0x078)  Control and status register for divider.
+	uint32_t RESERVED1;          // (0x07c) Reserved
+	uint32_t INTERP0_ACCUM0;     // (0x080)  Read/write access to accumulator 0
+	uint32_t INTERP0_ACCUM1;     // (0x084)  Read/write access to accumulator 1
+	uint32_t INTERP0_BASE0;      // (0x088)  Read/write access to BASE0 register.
+	uint32_t INTERP0_BASE1;      // (0x08c)  Read/write access to BASE1 register.
+	uint32_t INTERP0_BASE2;      // (0x090)  Read/write access to BASE2 register.
+	uint32_t INTERP0_POP_LANE0;  // (0x094)  Read LANE0 result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP0_POP_LANE1;  // (0x098)  Read LANE1 result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP0_POP_FULL;   // (0x09c)  Read FULL result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP0_PEEK_LANE0; // (0x0a0)  Read LANE0 result, without altering any internal state (PEEK).
+	uint32_t INTERP0_PEEK_LANE1; // (0x0a4)  Read LANE1 result, without altering any internal state (PEEK).
+	uint32_t INTERP0_PEEK_FULL;  // (0x0a8)  Read FULL result, without altering any internal state (PEEK).
+	uint32_t INTERP0_CTRL_LANE0; // (0x0ac)  Control register for lane 0
+	uint32_t INTERP0_CTRL_LANE1; // (0x0b0)  Control register for lane 1
+	uint32_t INTERP0_ACCUM0_ADD; // (0x0b4)  Values written here are atomically added to ACCUM0
+	uint32_t INTERP0_ACCUM1_ADD; // (0x0b8)  Values written here are atomically added to ACCUM1
+	uint32_t INTERP0_BASE_1AND0; // (0x0bc)  On write, the lower 16 bits go to BASE0, upper bits to BASE1 simultaneously.
+	uint32_t INTERP1_ACCUM0;     // (0x0c0)  Read/write access to accumulator 0
+	uint32_t INTERP1_ACCUM1;     // (0x0c4)  Read/write access to accumulator 1
+	uint32_t INTERP1_BASE0;      // (0x0c8)  Read/write access to BASE0 register.
+	uint32_t INTERP1_BASE1;      // (0x0cc)  Read/write access to BASE1 register.
+	uint32_t INTERP1_BASE2;      // (0x0d0)  Read/write access to BASE2 register.
+	uint32_t INTERP1_POP_LANE0;  // (0x0d4)  Read LANE0 result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP1_POP_LANE1;  // (0x0d8)  Read LANE1 result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP1_POP_FULL;   // (0x0dc)  Read FULL result, and simultaneously write lane results to both accumulators (POP).
+	uint32_t INTERP1_PEEK_LANE0; // (0x0e0)  Read LANE0 result, without altering any internal state (PEEK).
+	uint32_t INTERP1_PEEK_LANE1; // (0x0e4)  Read LANE1 result, without altering any internal state (PEEK).
+	uint32_t INTERP1_PEEK_FULL;  // (0x0e8)  Read FULL result, without altering any internal state (PEEK).
+	uint32_t INTERP1_CTRL_LANE0; // (0x0ec)  Control register for lane 0
+	uint32_t INTERP1_CTRL_LANE1; // (0x0f0)  Control register for lane 1
+	uint32_t INTERP1_ACCUM0_ADD; // (0x0f4)  Values written here are atomically added to ACCUM0
+	uint32_t INTERP1_ACCUM1_ADD; // (0x0f8)  Values written here are atomically added to ACCUM1
+	uint32_t INTERP1_BASE_1AND0; // (0x0fc)  On write, the lower 16 bits go to BASE0, upper bits to BASE1 simultaneously.
+	uint32_t SPINLOCK0;          // (0x100)  Spinlock register 0
+	uint32_t SPINLOCK1;          // (0x104)  Spinlock register 1
+	uint32_t SPINLOCK2;          // (0x108) Spinlock register 2
+	uint32_t SPINLOCK3;          // (0x10c) Spinlock register 3
+	uint32_t SPINLOCK4;          // (0x110) Spinlock register 4
+	uint32_t SPINLOCK5;          // (0x114) Spinlock register 5
+	uint32_t SPINLOCK6;          // (0x118) Spinlock register 6
+	uint32_t SPINLOCK7;          // (0x11c) Spinlock register 7
+	uint32_t SPINLOCK8;          // (0x120) Spinlock register 8
+	uint32_t SPINLOCK9;          // (0x124) Spinlock register 9
+	uint32_t SPINLOCK10;         // (0x128) Spinlock register 10
+	uint32_t SPINLOCK11;         // (0x12c) Spinlock register 11
+	uint32_t SPINLOCK12;         // (0x130) Spinlock register 12
+	uint32_t SPINLOCK13;         // (0x134) Spinlock register 13
+	uint32_t SPINLOCK14;         // (0x138) Spinlock register 14
+	uint32_t SPINLOCK15;         // (0x13c) Spinlock register 15
+	uint32_t SPINLOCK16;         // (0x140) Spinlock register 16
+	uint32_t SPINLOCK17;         // (0x144) Spinlock register 17
+	uint32_t SPINLOCK18;         // (0x148) Spinlock register 18
+	uint32_t SPINLOCK19;         // (0x14c) Spinlock register 19
+	uint32_t SPINLOCK20;         // (0x150) Spinlock register 20
+	uint32_t SPINLOCK21;         // (0x154) Spinlock register 21
+	uint32_t SPINLOCK22;         // (0x158) Spinlock register 22
+	uint32_t SPINLOCK23;         // (0x15c) Spinlock register 23
+	uint32_t SPINLOCK24;         // (0x160) Spinlock register 24
+	uint32_t SPINLOCK25;         // (0x164) Spinlock register 25
+	uint32_t SPINLOCK26;         // (0x168) Spinlock register 26
+	uint32_t SPINLOCK27;         // (0x16c) Spinlock register 27
+	uint32_t SPINLOCK28;         // (0x170) Spinlock register 28
+	uint32_t SPINLOCK29;         // (0x174) Spinlock register 29
+	uint32_t SPINLOCK30;         // (0x178) Spinlock register 30
+	uint32_t SPINLOCK31;         // (0x17c) Spinlock register 31
+};
+
+#define SIO ((volatile struct sio_hw*)SIO_BASE)
+
+#define SIO_FIFO_ST_RDY_BITS (unsigned)(0x00000002)
+#define SIO_FIFO_ST_VLD_BITS (unsigned)(0x00000001)
 
 
 #endif /** END: __RP2040_H */

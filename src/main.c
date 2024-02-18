@@ -76,11 +76,11 @@ void init() {
 
 	// Setup strobe light
 	gpio_init(STROBE, GPIO_FUNC_SIO); // Set pin function to SIO
-	gpio_dir(STROBE, GPIO_OUT); // Set pin as output
+	gpio_dir(STROBE, GPIO_OUTPUT); // Set pin as output
 	gpio_set(STROBE, HIGH); // Set pin high on startup
 	// Setup navigation lights
 	gpio_init(NAVLIGHTS, GPIO_FUNC_SIO); // Set pin function to SIO
-	gpio_dir(NAVLIGHTS, GPIO_OUT); // Set pin as output
+	gpio_dir(NAVLIGHTS, GPIO_OUTPUT); // Set pin as output
 	gpio_set(NAVLIGHTS, HIGH); // turn on sidelights
 }
 
@@ -101,7 +101,7 @@ void loop() {
 void HardFault_Handler() {
 	// Setup LED GPIO pins
 	gpio_init(13, GPIO_FUNC_SIO); // Set pin function to SIO
-	gpio_dir(13, GPIO_OUT); // Set pin as output
+	gpio_dir(13, GPIO_OUTPUT); // Set pin as output
 	while(1){ // Blink LED forever
 		gpio_set(13, HIGH);
 		delay_nop(1000000);
