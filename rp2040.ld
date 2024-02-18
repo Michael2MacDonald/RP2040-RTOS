@@ -37,7 +37,7 @@ SECTIONS {
 		KEEP(*(.reset))   /* Initialises data and ensures the cores are in a predictable state */
 		KEEP(*(.startup)) /* Initializes peripherals, starts RTOS, and runs application */
 
-		*(.text.cold*) /* Code that is not often run. Seperate this code so that other code can be closer together and sometimes faster (Look into gcc compiler option "cold") */
+		*(.text.cold*) /* Code that is not often run. Separate this code so that other code can be closer together and sometimes faster (Look into gcc compiler option "cold") */
 
 		/* *(.flashmem*) */     /* Code that should not be copied to ram */
 		*(.text*)
@@ -77,6 +77,7 @@ SECTIONS {
 		. = ALIGN(4);
 	} > RAM AT> FLASH
 
+	/* statically allocated variables */
 	.bss : {
 		__bss_start__ = .; /* Used by standard library to zero out bss */
 		*(SORT_BY_ALIGNMENT(SORT_BY_NAME(.bss*)))

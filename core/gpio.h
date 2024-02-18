@@ -4,10 +4,6 @@
 // #include <stdint.h>
 #include <stdbool.h>
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 #define GPIO_FUNC_XIP			0
 #define GPIO_FUNC_SPI			1
 #define GPIO_FUNC_UART			2
@@ -35,9 +31,5 @@ void gpio_set(uint32_t gpio, uint32_t value);
 bool gpio_get(uint32_t gpio);
 bool gpio_out_get(uint32_t gpio);
 
-
-// #ifdef __cplusplus
-// }; /** END: __cplusplus */
-// #endif
 
 #endif /** END: __GPIO_H */

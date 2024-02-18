@@ -96,7 +96,7 @@ struct scb_hw {
 	uint32_t AIRCR;        // (0x00C) (R/W) Application Interrupt and Reset Control Register
 	uint32_t SCR;          // (0x010) (R/W) System Control Register
 	uint32_t CCR;          // (0x014) (R/W) Configuration Control Register
-	uint32_t RESERVED1;    // (0x018) (R/ ) Reserved - SHPR1
+	uint32_t RESERVED0;    // (0x018) (R/ ) Reserved - SHPR1
 	uint32_t SHP[2];       // (0x01C) (R/W) System Handlers Priority Registers. [0] is RESERVED */
 	uint32_t SHCSR;        // (0x024) (R/W) System Handler Control and State Register */
 };
